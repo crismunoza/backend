@@ -18,7 +18,6 @@ export const login = async (req :Request, res : Response)=>{
        
         console.log('esntra al try')
         const EsRepre: any = await RepresentanteVecinal.findOne({where:{rut_representante: cuerpo.rut}});
-        console.log('qqqqqqqqq',EsRepre)
         //const EsVecino: any = await Vecino.findOne({where:{rut_vecino: cuerpo.rut}});
         if(EsRepre !== null){                      
             respuesta = 'representante';
