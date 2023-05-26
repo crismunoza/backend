@@ -1,5 +1,6 @@
 dist/db/connection.js
 src/db/models/connection.ts
+backend/src/db/models/connection.ts
 dist
 node_modules
 
