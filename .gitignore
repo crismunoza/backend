@@ -1,4 +1,7 @@
-/src/db/connection.js
+dist/db/connection.js
+src/db/models/connection.ts
+backend/dist
+backend/node_modules
 
 
 
