@@ -52,7 +52,7 @@ export const insertvecino = async (req: Request, res: Response) => {
     fs.writeFileSync(imagePath, imageBuffer);
 
     // Obtiene la URL de la imagen guardada
-    const imageUrl = `C:/Users/Christian/Desktop/plantilla/backend/src/utils/evidencia/${imageName}`;
+    const imageUrl = `C:/portafolio/max/proyecto/backend/src/utils/evidencia/${imageName}`;
     console.log("ruta_evidencia:", imageName); 
     const vecino = await Vecino.create({
       rut_vecino,

@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { RepresentanteVecinal } from '../models/mer';
+import { RepresentanteVecinal, Vecino } from '../models/mer';
 
 //login
 
@@ -15,24 +15,20 @@ export const login = async (req :Request, res : Response)=>{
  
     try{
         // le indicamos a la const de tipo any, ya qpor defecto el atributop q devuelva sera un strg y entrara en conflicto con lo q espera bycript y el modelo del mer
-        const EsRepre: any = await RepresentanteVecinal.findOne({where:{rut_representante: cuerpo.rut_representante}});
-        
-        if(EsRepre !== null){
-           // const EsVecino = await Vecino.findOne({attributes: ['rut_vecino','contrasenia'],where:{rut_vecino: cuerpo.rut_user}});
-            // if(!EsVecino){
-            //     return;
-            // }
-            // respuesta = 'Es vecino';
-            // return respuesta;
-            
+       
+        console.log('esntra al try')
+        const EsRepre: any = await RepresentanteVecinal.findOne({where:{rut_representante: cuerpo.rut}});
+        //const EsVecino: any = await Vecino.findOne({where:{rut_vecino: cuerpo.rut}});
+        if(EsRepre !== null){                      
             respuesta = 'representante';
+            console.log('entra en es rep',EsRepre)
             const validPassword = await bcrypt.compare(cuerpo.contrasenia,EsRepre.contrasenia);
             if(validPassword === true){
-                //const nombre = EsRepre.primer_nombre;
                 const id = EsRepre.id_representante_vecinal;
                 const rol = 'admin';
+                console.log('que rol enviamos',rol)
                 const token = jwt.sign({
-                    rut_representante: cuerpo.rut_representante,
+                    rut_user: cuerpo.rut,
                         },process.env.SECRET_KEY || "secretkey"); // se le puede agregar que espere 1 hora para que expire {expiresIn: 60 * 60}
                 const alo = [] = [id,token,rol];
                 
@@ -44,24 +40,37 @@ export const login = async (req :Request, res : Response)=>{
             }
             
         }
+        else if( EsRepre === null){
+          const EsVecino: any = await Vecino.findOne({where:{rut_vecino: cuerpo.rut}});
+          if(EsVecino !== null){
+            respuesta = 'Vecino';
+          const validPassword = await bcrypt.compare(cuerpo.contrasenia,EsVecino.contrasenia);
+            if(validPassword === true){
+                const id = EsVecino.id_vecino;
+                const rol = 'vecino';
+                console.log('que rol enviamos',rol)
+                const token = jwt.sign({
+                    rut_user: cuerpo.rut,
+                        },process.env.SECRET_KEY || "secretkey"); // se le puede agregar que espere 1 hora para que expire {expiresIn: 60 * 60}
+                const alo = [] = [id,token,rol];
+                
+                return res.json({alo});
+            }
+            else{
+                const alo = [] = [respuesta,'clave invalida'];
+                return res.json({alo});
+            }
+          }
+          else{
+            respuesta = 'no existe usario';
+          return res.json({respuesta, 'status':500});
+          }
+          
+        }
         else{            
         respuesta = 'no existe usario';
-        return res.json({respuesta});
+        return res.json({respuesta, 'status':500});
         }
-        // else{    
-        //     console.log(respuesta)
-        //     respuesta = 'Es representante';
-        //     const validPassword = await bcrypt.compare(cuerpo.contrasenia,EsRepre.contrasenia);
-        //     if(validPassword === true){
-        //         const alo = [] = [respuesta,'RepVec'];
-        //         return alo;
-        //     }
-        //     else{
-        //         const alo = [] = [respuesta,'clave invalida'];
-        //         return alo;
-        //     }
-            
-        // }
     }
     catch{
         console.log(respuesta)
