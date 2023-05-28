@@ -2,6 +2,6 @@ dist/db/connection.js
 src/db/connection.ts
 dist
 node_modules
-
+src/utils/evidencia
 
 
