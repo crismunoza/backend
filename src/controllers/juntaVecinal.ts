@@ -58,8 +58,10 @@ export const inserRep = async(req:Request, res : Response)=>{
     try {
         const RepExistente = await RepresentanteVecinal.findOne({where: {rut_representante: datoRep.rut_representante}});
         if (RepExistente !== null){
-            return res.status(401).json({
-                msg: `El represenatante ya se encuentra en el sistema.`
+            console.log('entra a q existe rep ')
+            JuntaVecinal.destroy({where:{id_junta_vecinal:datoRep.id_junta_vecinal}});
+            return res.json({
+                msg: `El represenatante ya se encuentra en el sistema, no se realiza la creación de la junta vecinal`
             })
         }
         else{             
@@ -86,7 +88,7 @@ export const inserRep = async(req:Request, res : Response)=>{
             return res.json({ msg:'yes'});   
         }
     }
-    catch{
+    catch(error) {
         console.log('hay un error')
     }
 };
