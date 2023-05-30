@@ -52,7 +52,7 @@ export const insertvecino = async (req: Request, res: Response) => {
     fs.writeFileSync(imagePath, imageBuffer);
 
     // Obtiene la URL de la imagen guardada
-    const imageUrl = `C:/portafolio/max/proyecto/backend/src/utils/evidencia/${imageName}`;
+    const imageUrl = `src/utils/evidencia/${imageName}`;
     console.log("ruta_evidencia:", imageName); 
     const vecino = await Vecino.create({
       rut_vecino,
@@ -158,11 +158,12 @@ export const deletevecino = async (req: Request, res: Response) => {
   const deleteRowCount = await Vecino.destroy({
     where: {
       rut_vecino
-    }
+    },
+    cascade: true
   });
 
   // Eliminar la imagen asociada
-  const imagePath = `C:/Users/Christian/Desktop/plantilla/backend/src/utils/evidencia/${rut_vecino}.jpg`;
+  const imagePath = `src/utils/evidencia/${rut_vecino}.jpg`;
   fs.unlink(imagePath, (err) => {
     if (err) {
       console.error('Error al eliminar la imagen:', err);
