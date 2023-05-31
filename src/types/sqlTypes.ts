@@ -11,3 +11,6 @@ export enum SQLTableNameValues {
   municipalidad = "Municipalidad",
   comuna = "Comuna"
 }
+export enum SQLTableProyect {
+  estado = 'ACTIVO',
+};
