@@ -4,14 +4,19 @@ import bcrypt from 'bcrypt';
 
 export const insertJuntaVecinal = async (req: Request, res: Response) => {
     const data = req.body;    
-    try {
-        const existeJuntaVecinal =  await JuntaVecinal.findOne({where: {razon_social: data.razon_social}});
-        if (existeJuntaVecinal !== null){
-            return res.status(400).json({
+    console.log('ingresa al servicio')
+   
+        const existeJuntaVecinal =  await JuntaVecinal.findOne({where: {rut_junta: data.rut_junta}});
+        console.log('QQQQQQ',existeJuntaVecinal)
+        if (existeJuntaVecinal){
+            console.log('estra aqui')
+            return res.json({
+                status:400,
                 msg: `La junta vecinal ya se encuentra registrada.`
             })
         }
         else {
+            console.log('entra a crear la junta')
             const juntaVEcinal =  await JuntaVecinal.create({ 
                 razon_social: data.razon_social,
                 direccion: data.direccion,
@@ -28,14 +33,12 @@ export const insertJuntaVecinal = async (req: Request, res: Response) => {
             let b = aaa?.toString( );
             //aqui creamos una variable json que retornaremos como respuesta
             return res.json({
+                status:200,
                 id: b,
-                msg: 'ok'
+                msg: `ok`
             });
         }
-    } catch( error ) {
-        console.error('Error al insertar los datos en la tabla junta_vecinal:', error);
-
-    }
+    
 }; 
 
 export const getJuntaVecinal = async (req: Request, res: Response) => {
