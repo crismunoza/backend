@@ -77,6 +77,7 @@ export const JuntaVecinal = sequelize.define('JuntaVecinal', {
     tableName: 'junta_vecinal'
 });
 JuntaVecinal.belongsTo(Comuna, { foreignKey: 'fk_id_comuna' });
+Comuna.hasMany(JuntaVecinal, { foreignKey: 'fk_id_comuna' });
 
 export const Proyecto = sequelize.define('Proyecto', {
     id_proyecto: { 
@@ -229,6 +230,7 @@ export const RepresentanteVecinal = sequelize.define('RepresentanteVecinal', {
         tableName: 'representante_vecinal'
 });
 RepresentanteVecinal.belongsTo(JuntaVecinal, { foreignKey: 'fk_id_junta_vecinal' });
+JuntaVecinal.hasMany(RepresentanteVecinal, { foreignKey: 'fk_id_junta_vecinal' });
 
 export const Actividad = sequelize.define('Actividad', {
     id_actividad: { 
@@ -340,6 +342,7 @@ export const Vecino = sequelize.define('Vecino', {
         tableName: 'vecino'
 });
  Vecino.belongsTo(JuntaVecinal, { foreignKey: 'fk_id_junta_vecinal' });
+ JuntaVecinal.hasMany(Vecino, { foreignKey: 'fk_id_junta_vecinal' });
 
 
 export const Certificado = sequelize.define('Certificado', {
