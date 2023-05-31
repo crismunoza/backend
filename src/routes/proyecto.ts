@@ -4,5 +4,10 @@ import proyectoController from '../controllers/proyecto';
 const router = Router();
  
 router.post('/agregar-proyecto', proyectoController.insertProyect);
+router.get('/obtener-proyectos', proyectoController.getProyects);
+router.get('/filtro-proyectos', proyectoController.getFilters);
+router.post('/obtener-proyectos-filtros', proyectoController.getProyectsWithFilters);
+router.put('/modificar-proyecto/:idProyecto', proyectoController.updateProyect);
+router.delete('/eliminar-proyecto/:idProyecto', proyectoController.deleteProyect);
 
 export default router;

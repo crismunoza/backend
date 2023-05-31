@@ -77,6 +77,7 @@ export const JuntaVecinal = sequelize.define('JuntaVecinal', {
     tableName: 'junta_vecinal'
 });
 JuntaVecinal.belongsTo(Comuna, { foreignKey: 'fk_id_comuna' });
+Comuna.hasMany(JuntaVecinal, { foreignKey: 'fk_id_comuna' });
 
 export const Proyecto = sequelize.define('Proyecto', {
     id_proyecto: { 
@@ -229,6 +230,7 @@ export const RepresentanteVecinal = sequelize.define('RepresentanteVecinal', {
         tableName: 'representante_vecinal'
 });
 RepresentanteVecinal.belongsTo(JuntaVecinal, { foreignKey: 'fk_id_junta_vecinal' });
+JuntaVecinal.hasMany(RepresentanteVecinal, { foreignKey: 'fk_id_junta_vecinal' });
 
 export const Actividad = sequelize.define('Actividad', {
     id_actividad: { 
@@ -340,6 +342,8 @@ export const Vecino = sequelize.define('Vecino', {
         tableName: 'vecino'
 });
  Vecino.belongsTo(JuntaVecinal, { foreignKey: 'fk_id_junta_vecinal' });
+ JuntaVecinal.hasMany(Vecino, { foreignKey: 'fk_id_junta_vecinal' });
+
 
 export const Certificado = sequelize.define('Certificado', {
     id_certificado: { 
@@ -368,9 +372,12 @@ export const Solicitud = sequelize.define('Solicitud', {
         primaryKey: true,
         autoIncrement: true
     },
-    tipo_solicitud: {
+    titulo_solicitud: {
         type: DataTypes.STRING,
-        unique: true,
+        allowNull: true,
+    },
+    asunto_solicitud: {
+        type: DataTypes.STRING,
         allowNull: true,
     },
     descripcion: {
@@ -379,19 +386,28 @@ export const Solicitud = sequelize.define('Solicitud', {
     },
     estado_solicitud: {
         type: DataTypes.STRING,
-        unique: false,
         allowNull: false,
+    },
+    respuesta: {
+        type: DataTypes.STRING,
+        allowNull: true,
     },
     fk_id_vecino:{
         type: DataTypes.INTEGER,
         allowNull: false
     },
+    createdAt: {
+        type: DataTypes.DATEONLY,
+        defaultValue: DataTypes.NOW
+    }
     },
 {
-    createdAt: false,
     timestamps: false,
     tableName: 'solicitud'
 });
+Vecino.hasMany(Solicitud, { foreignKey: 'fk_id_vecino' });
+Solicitud.belongsTo(Vecino, { foreignKey: 'fk_id_vecino' });
+
 
 export const Valoracion = sequelize.define('Valoracion', {
     id_valoracion: { 
