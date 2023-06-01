@@ -3,5 +3,7 @@ src/db/connection.ts
 dist
 node_modules
 src/utils/evidencia
+src/utils/evidencia_firma_rep
+src/utils/proyectos
 
 
