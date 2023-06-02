@@ -10,7 +10,9 @@ import routajunta from "../routes/juntavecinal"
 import routacertificado from "../routes/certificados"
 import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
+
 import rutavaloraciones from "../routes/valoraciones"
+
 import { verificarTablas } from "./exists";
 
 
@@ -47,12 +49,12 @@ export class Server {
         this.app.use('/api/certificados', routacertificado);
         this.app.use('/api/solicitudes', routasolicitud);
         this.app.use('/api/valoraciones', rutavaloraciones);
+
     }
     middlewares() {
-        //parseo y lectura del body
-        this.app.use(Express.json());
-        //directorio publico
+        this.app.use(Express.json({ limit: '10mb' }));
         this.app.use(cors());
+        this.app.use(Express.urlencoded({ limit: '10mb', extended: true }));
     }
     //metodo para conectar a la base de datos y sincronizar los modelos
     async conectarDB() {

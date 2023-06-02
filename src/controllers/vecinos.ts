@@ -8,7 +8,6 @@ import bcrypt from 'bcrypt';
 
 // Aqui empieza el metodo para insertar vecinos modulo de registro de vecinos
 export const insertvecino = async (req: Request, res: Response) => {
-  // Obtiene los datos del cuerpo de la solicitud
   const {
     rut_vecino,
     primer_nombre,
@@ -24,36 +23,24 @@ export const insertvecino = async (req: Request, res: Response) => {
     estado,
     fk_id_junta_vecinal
   } = req.body;
-   console.log(req.body)
-   //contraseña encriptada
+
   const hashpasword = await bcrypt.hash(contrasenia, 10);
+
   try {
-
-
-    // Decodifica la imagen codificada en Base64
     const imageBuffer = decodeBase64Image(ruta_evidencia);
-    console.log("ruta_evidencia:", imageBuffer);
-    
-    // Genera un nombre de archivo único para la imagen
-    const imageName = `${rut_vecino}.jpg`;
 
-    // Ruta de la carpeta donde se guardarán las imágenes
+    const imageName = `${rut_vecino}.jpg`;
     const imageFolder = path.join(__dirname, "../../src/utils/evidencia");
 
-    // Crea la carpeta si no existe
     if (!fs.existsSync(imageFolder)) {
       fs.mkdirSync(imageFolder, { recursive: true });
     }
 
-    // Ruta completa de la imagen
     const imagePath = path.join(imageFolder, imageName);
-
-    // Guarda la imagen en el sistema de archivos
     fs.writeFileSync(imagePath, imageBuffer);
 
-    // Obtiene la URL de la imagen guardada
-    const imageUrl = `src/utils/evidencia/${imageName}`;
-    console.log("ruta_evidencia:", imageName); 
+    const imageBase64 = imageBuffer.toString('base64');
+
     const vecino = await Vecino.create({
       rut_vecino,
       primer_nombre,
@@ -65,11 +52,11 @@ export const insertvecino = async (req: Request, res: Response) => {
       telefono,
       contrasenia: hashpasword,
       avatar,
-      ruta_evidencia: imageUrl,
+      ruta_evidencia: imageBase64,
       estado,
       fk_id_junta_vecinal
     });
-    console.log("LOQUE LLEGA EN VECINO",vecino)
+
     return res.json({
       msg: 'Se insertó correctamente',
       vecino
@@ -213,7 +200,7 @@ export const noacepptado = async (req: Request, res: Response) => {
   });
 
   // Eliminar la imagen asociada
-  const imagePath = `C:/Users/Christian/Desktop/plantilla/backend/src/utils/evidencia/${rut_vecino}.jpg`;
+  const imagePath = `src/utils/evidencia/${rut_vecino}.jpg`;
   fs.unlink(imagePath, (err) => {
     if (err) {
       console.error('Error al eliminar la imagen:', err);

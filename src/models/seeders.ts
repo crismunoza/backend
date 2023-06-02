@@ -5,7 +5,6 @@ export class Seeders{
 
     //**datos a insertar */
     dataComuna = [
-        { nombre: '-------' },
         { nombre: 'Puente Alto' },
         { nombre: 'La Florida' },
         { nombre: 'Maipu' },
