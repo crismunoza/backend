@@ -11,6 +11,7 @@ import routacertificado from "../routes/certificados"
 import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
 
+import rutavaloraciones from "../routes/valoraciones"
 
 import { verificarTablas } from "./exists";
 
@@ -42,13 +43,13 @@ export class Server {
         this.app.use('/api/users', routauser);
         this.app.use('/api/reset', routareset);
         this.app.use('/api/comunas', routacomuna);
-        // this.app.use('/api/municipalidades', routamunicipalidad);
         this.app.use('/api/juntavecinal', routajunta);
         this.app.use('/api/insertvecino', routavecino);
         this.app.use('/api/proyectos', routaproyecto);
         this.app.use('/api/certificados', routacertificado);
         this.app.use('/api/solicitudes', routasolicitud);
-      
+        this.app.use('/api/valoraciones', rutavaloraciones);
+
     }
     middlewares() {
         this.app.use(Express.json({ limit: '10mb' }));
