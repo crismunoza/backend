@@ -438,5 +438,3 @@ export const Valoracion = sequelize.define('Valoracion', {
     timestamps: false,
     tableName: 'valoracion'
 });
-Vecino.hasMany(Valoracion, { foreignKey: 'fk_id_vecino' });
-Valoracion.belongsTo(Vecino, { foreignKey: 'fk_id_vecino' });

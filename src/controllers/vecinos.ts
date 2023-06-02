@@ -85,9 +85,19 @@ export const updatevecino = async (req: Request, res: Response) => {
     telefono,
     contrasenia
   } = req.body;
-  
-     //contraseña encriptada
-     const hashpasword = await bcrypt.hash(contrasenia, 10);
+
+ let hashpasword: string;
+  // Busca el vecino en la base de datos
+ const vecino: any = await Vecino.findOne({ where: { rut_vecino: rut_vecino } });
+
+ if (contrasenia === vecino.contrasenia) {
+   // La contraseña ya está encriptada, utiliza la misma contraseña encriptada
+   hashpasword = vecino.contrasenia;
+ } else {
+   // La contraseña no está encriptada, encripta la contraseña
+   hashpasword = await bcrypt.hash(contrasenia, 10);
+
+ }
   // Actualiza los datos del vecino en la base de datos
   const result = await Vecino.update(
     {
@@ -117,6 +127,8 @@ export const updatevecino = async (req: Request, res: Response) => {
     msg: 'No se encontró el vecino'
   });
 }
+
+
 
 export const getvecinos = async (req: Request, res: Response) => {
   try {
