@@ -323,7 +323,7 @@ export const Vecino = sequelize.define('Vecino', {
         allowNull: false,
     },
     ruta_evidencia: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT, 
         allowNull: false,
     },
     estado: {
