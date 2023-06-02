@@ -6,6 +6,6 @@ const router = Router();
  * Distinción de rutas según la información que se necesita manipular.
  */
 
-router.post('/', enviarSolicitud);
+router.post('/enviar', enviarSolicitud);
 
 export default router;
