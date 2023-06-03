@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { ObtenerEstrellas, enviarSolicitud } from '../controllers/valoracion';
+import { ObtenerEstrellas, enviarSolicitud, listarValoraciones } from '../controllers/valoracion';
 
 const router = Router();
 /**
@@ -8,5 +8,6 @@ const router = Router();
 
 router.post('/enviar', enviarSolicitud);
 router.get('/obtenerStar/:id', ObtenerEstrellas);
+router.get('/listarValoraciones/:id_junta',listarValoraciones);
 
 export default router;
