@@ -127,6 +127,12 @@ export const CrearReport = async (req: Request, res: Response) => {
     res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
     res.send(buffer);
 
+    const spQuery3 = `DROP TABLE "excel";`;
+    await db.query(spQuery3);
+
+    const spQuery4 = `DROP PROCEDURE "ObtenerReportePorJuntaVecinal";`;
+    await db.query(spQuery4);
+
   } catch (error) {
     console.error('Error al obtener el reporte por junta vecinal:', error);
     res.status(500).json({ error: 'Error al obtener el reporte por junta vecinal' });
