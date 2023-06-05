@@ -3,7 +3,7 @@ import { Proyecto, RepresentanteVecinal } from '../models/mer';
 import { ProyectoType } from '../types/types';
 import { getMaxId } from '../models/queries';
 import { SQLTableNameValues, SQLTableProyect } from '../types/sqlTypes';
-import { convertUpperCASE, deleteSpace, formatDate } from '../services/parser'
+import { convertUpperCASE, deleteSpace, formatDate, parserUpperWord } from '../services/parser'
 import { decodeBase64Image } from "../utils/imageUtils";
 import path from "path";
 import fs from "fs";
@@ -28,6 +28,8 @@ class ProyectoController {
         const formattedDate = formatDate(req.body.fecha);
         //eliminación de espacios en la ruta de la imagen.
         const formattedImagen = deleteSpace(imagen);
+        const formattedNombreProyecto = parserUpperWord(nombreProyecto);
+        const formattedDescripcion = parserUpperWord(descripcion);
         //obtención de fk_id_junta_vecinal por el rut del representante.
         const representante_fk_id_junta_vecinal = await RepresentanteVecinal.findOne({
           where: { rut_representante: rut_user },
@@ -36,28 +38,27 @@ class ProyectoController {
         if(representante_fk_id_junta_vecinal){
           fk_id_junta_vecinal = representante_fk_id_junta_vecinal.dataValues['fk_id_junta_vecinal']
         }
-        // console.log(image,'ruta imagen')
         //**guardado de imagen */
         const imageBuffer = decodeBase64Image(image);
-        console.log("ruta_imagen:", imageBuffer);
         const nombreImagen = deleteSpace(nombreProyecto);
-        console.log(nombreImagen, 'nombre imagen')
-        const imageName = `${nombreImagen}.jpg`;
-        const imageFolder = path.join(__dirname, "../../src/utils/proyectos");
-        if (!fs.existsSync(imageFolder)) {
-          fs.mkdirSync(imageFolder, { recursive: true });
-        }
+        const imageName = `${nombreImagen}.png`;
+        const imageFolder = path.join(__dirname, "../../public/images/proyectos");
         const imagePath = path.join(imageFolder, imageName);
-        fs.writeFileSync(imagePath, imageBuffer);
+        if (!fs.existsSync(imagePath)) {
+          if (!fs.existsSync(imageFolder)) {
+            fs.mkdirSync(imageFolder, { recursive: true });
+          }
+          fs.writeFileSync(imagePath, imageBuffer);
+        } else {
+          console.log('La imagen ya existe en la carpeta de proyectos');
+        }
 
-        const imageUrl = `src/utils/evidencia/${imageName}`;
-        console.log("ruta_evidencia:", imageName);
-        console.log(imageUrl,'ruta almacenada')
+        const imageUrl = imageName;
         //crea el objeto de datos del proyecto de tipo ProyectoType.
         const proyectoData: ProyectoType = {
           id_proyecto: maxId,
-          nombre: nombreProyecto,
-          descripcion,
+          nombre: formattedNombreProyecto,
+          descripcion: formattedDescripcion,
           cupo_min: cupoMinimo,
           cupo_max: cupoMaximo,
           estado,
@@ -108,13 +109,12 @@ class ProyectoController {
           }
         });
       }
-  
       return res.status(200).json(proyects);
     } catch (error) {
       return res.status(500).json({ resp: "Error al obtener los proyectos", error: '0' });
     }
   };
-
+    
   getFilters = async (req: Request, res: Response) => {
     try {
       const estados = await Proyecto.findAll({
@@ -158,8 +158,19 @@ class ProyectoController {
     }
 
   };
-}
 
+  getImagenes = async (req: Request, res: Response) => {
+    try {
+      const imageName = req.query.imageName as string;
+      const imagePath = path.join(__dirname, '../../public/proyectos', imageName);
+
+      res.sendFile(imagePath);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Error al obtener la imagen' });
+    }
+  };
+}  
 const proyectoController = new ProyectoController();
 
 export default proyectoController;
