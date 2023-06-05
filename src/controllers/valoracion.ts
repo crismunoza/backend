@@ -50,20 +50,22 @@ export const ObtenerEstrellas =async (req:Request, res:Response) => {
 export const listarValoraciones = async (req:Request, res:Response) => {
     const id_junta = req.params.id_junta;
     console.log('llega al servicio este id: ', id_junta)
-    var respuesta:any = '';
+    var respuest:any = '' ;
 
     try{
-        const b = `select "vecino"."primer_nombre"|| '' ||"vecino"."primer_apellido" || '' ||"vecino"."segundo_apellido" as vecino,"valoracion"."cantidad_estrellas","valoracion"."comentario"
+        const b = `select "vecino"."primer_nombre"|| '' ||"vecino"."primer_apellido" || '' ||"vecino"."segundo_apellido" as "vecino","valoracion"."cantidad_estrellas" as "estrellas","valoracion"."comentario" as "comentario"
         from "junta_vecinal" 
         left JOIN "vecino" on "junta_vecinal"."id_junta_vecinal"="vecino"."fk_id_junta_vecinal" 
         left JOIN "valoracion" on "vecino"."id_vecino"="valoracion"."fk_id_vecino" where "junta_vecinal"."id_junta_vecinal" =${id_junta}`;
-        const valoraciones = await await db.query(b, {
+        const valoraciones = await db.query(b, {
             type: QueryTypes.SELECT,
         }); 
-        respuesta = valoraciones;
+        respuest = valoraciones;
+        console.log(respuest)
+        return res.json({data: respuest});
     }
     catch(error){
-        respuesta =  error;
+        console.log(error)
     }
-    return res.json({respuesta});
+    
 }
