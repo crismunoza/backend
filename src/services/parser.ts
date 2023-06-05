@@ -49,3 +49,25 @@ export const covertFirstCapitalLetterWithSpace = (cadena: string) => {
 
   return resultado.join(' ');
 };
+/**
+ * eliminación de la tilde en alguna vocal.
+ * @param letter 
+ * @returns letter
+ */
+export const removeAccents = (letter: string) => {
+  const accents = [
+    { from: 'á', to: 'a' },
+    { from: 'é', to: 'e' },
+    { from: 'í', to: 'i' },
+    { from: 'ó', to: 'o' },
+    { from: 'ú', to: 'u' },
+  ];
+
+  for (const accent of accents) {
+    if (letter.includes(accent.from)) {
+      letter = letter.replace(accent.from, accent.to);
+    }
+  }
+
+  return letter;
+};
