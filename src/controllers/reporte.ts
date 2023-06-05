@@ -9,64 +9,64 @@ export const CrearReport = async (req: Request, res: Response) => {
   const { id_junta_vecinal } = req.params;
 
   try {
-
     const spQuery1 = `CREATE OR REPLACE PROCEDURE "ObtenerReportePorJuntaVecinal" AS
-    BEGIN
-      -- Crear la tabla si no existe
-    BEGIN
-        EXECUTE IMMEDIATE 'CREATE TABLE "excel" (
-          "numero_junta_vecinal" NUMBER(38,0),
-          "rut_junta_vecinal"    NVARCHAR2(255),
-          "razon_social"         NVARCHAR2(255),
-          "rut_vecino"           NVARCHAR2(255),
-          "primer_nombre"        NVARCHAR2(255),
-          "segundo_nombre"       NVARCHAR2(255),
-          "primer_apellido"      NVARCHAR2(255),
-          "segundo_apellido"     NVARCHAR2(255),
-          "direccion"            NVARCHAR2(255),
-          "nombre_proyecto"      NVARCHAR2(255),
-          "descripcion_proyecto" NVARCHAR2(255),
-          "estado_proyecto"      NVARCHAR2(255),
-          "fecha_proyecto"       NVARCHAR2(255),
-          "cupo_min"             NUMBER(38,0),
-          "cupo_max"             NUMBER(38,0)
-        )';
-      EXCEPTION
-        WHEN OTHERS THEN
-          -- Manejar la excepción si la tabla ya existe
-          IF SQLCODE != -955 THEN
-            RAISE;
-          END IF;
-      END;
-    
-      -- Truncar la tabla antes de insertar los datos
-      EXECUTE IMMEDIATE 'TRUNCATE TABLE "excel"';
-    
-      -- Insertar todos los datos en la tabla
-      EXECUTE IMMEDIATE 'INSERT INTO "excel"
-      SELECT
-        "junta_vecinal"."id_junta_vecinal",
-        "junta_vecinal"."rut_junta",
-        "junta_vecinal"."razon_social",
-        "vecino"."rut_vecino",
-        "vecino"."primer_nombre",
-        "vecino"."segundo_nombre",
-        "vecino"."primer_apellido",
-        "vecino"."segundo_apellido",
-        "vecino"."direccion",
-        "proyecto"."nombre",
-        "proyecto"."descripcion",
-        "proyecto"."estado",
-        "proyecto"."fecha_proyecto",
-        "proyecto"."cupo_min",
-        "proyecto"."cupo_max"
-      FROM
-        "reporte"
-        INNER JOIN "proyecto" ON "reporte"."fk_id_proyecto" = "proyecto"."id_proyecto"
-        INNER JOIN "vecino" ON "reporte"."rut_vecino" = "vecino"."rut_vecino"
-        INNER JOIN "junta_vecinal" ON "proyecto"."fk_id_junta_vecinal" = "junta_vecinal"."id_junta_vecinal"';
-    END; `;
+      BEGIN
+        -- Crear la tabla si no existe
+        BEGIN
+          EXECUTE IMMEDIATE 'CREATE TABLE "excel" (
+            "numero_junta_vecinal" NUMBER(38,0),
+            "rut_junta_vecinal"    NVARCHAR2(255),
+            "razon_social"         NVARCHAR2(255),
+            "rut_vecino"           NVARCHAR2(255),
+            "primer_nombre"        NVARCHAR2(255),
+            "segundo_nombre"       NVARCHAR2(255),
+            "primer_apellido"      NVARCHAR2(255),
+            "segundo_apellido"     NVARCHAR2(255),
+            "direccion"            NVARCHAR2(255),
+            "nombre_proyecto"      NVARCHAR2(255),
+            "descripcion_proyecto" NVARCHAR2(255),
+            "estado_proyecto"      NVARCHAR2(255),
+            "fecha_proyecto"       NVARCHAR2(255),
+            "cupo_min"             NUMBER(38,0),
+            "cupo_max"             NUMBER(38,0)
+          )';
+        EXCEPTION
+          WHEN OTHERS THEN
+            -- Manejar la excepción si la tabla ya existe
+            IF SQLCODE != -955 THEN
+              RAISE;
+            END IF;
+        END;
+      
+        -- Truncar la tabla antes de insertar los datos
+        EXECUTE IMMEDIATE 'TRUNCATE TABLE "excel"';
+      
+        -- Insertar todos los datos en la tabla
+        EXECUTE IMMEDIATE 'INSERT INTO "excel"
+        SELECT
+          "junta_vecinal"."id_junta_vecinal",
+          "junta_vecinal"."rut_junta",
+          "junta_vecinal"."razon_social",
+          "vecino"."rut_vecino",
+          "vecino"."primer_nombre",
+          "vecino"."segundo_nombre",
+          "vecino"."primer_apellido",
+          "vecino"."segundo_apellido",
+          "vecino"."direccion",
+          "proyecto"."nombre",
+          "proyecto"."descripcion",
+          "proyecto"."estado",
+          "proyecto"."fecha_proyecto",
+          "proyecto"."cupo_min",
+          "proyecto"."cupo_max"
+        FROM
+          "reporte"
+          INNER JOIN "proyecto" ON "reporte"."fk_id_proyecto" = "proyecto"."id_proyecto"
+          INNER JOIN "vecino" ON "reporte"."rut_vecino" = "vecino"."rut_vecino"
+          INNER JOIN "junta_vecinal" ON "proyecto"."fk_id_junta_vecinal" = "junta_vecinal"."id_junta_vecinal"';
+    END;`;
     await db.query(spQuery1);
+
     // Ejecutar el SP para llenar la tabla
     const spQuery = `BEGIN "ObtenerReportePorJuntaVecinal"; END;`;
     await db.query(spQuery);
@@ -132,7 +132,6 @@ export const CrearReport = async (req: Request, res: Response) => {
 
     const spQuery4 = `DROP PROCEDURE "ObtenerReportePorJuntaVecinal";`;
     await db.query(spQuery4);
-
   } catch (error) {
     console.error('Error al obtener el reporte por junta vecinal:', error);
     res.status(500).json({ error: 'Error al obtener el reporte por junta vecinal' });
@@ -140,3 +139,43 @@ export const CrearReport = async (req: Request, res: Response) => {
 };
 
 
+export const verreporte = async (req: Request, res: Response) => {
+  try {
+    const query = `
+        SELECT
+        "junta_vecinal"."id_junta_vecinal",
+        "junta_vecinal"."rut_junta",
+        "junta_vecinal"."razon_social",
+        "vecino"."rut_vecino",
+        "vecino"."primer_nombre",
+        "vecino"."segundo_nombre",
+        "vecino"."primer_apellido",
+        "vecino"."segundo_apellido",
+        "vecino"."direccion",
+        "proyecto"."nombre",
+        "proyecto"."descripcion",
+        "proyecto"."estado",
+        "proyecto"."fecha_proyecto",
+        "proyecto"."cupo_min",
+        "proyecto"."cupo_max"
+      FROM
+        "reporte"
+        INNER JOIN "proyecto" ON "reporte"."fk_id_proyecto" = "proyecto"."id_proyecto"
+        INNER JOIN "vecino" ON "reporte"."rut_vecino" = "vecino"."rut_vecino"
+        INNER JOIN "junta_vecinal" ON "proyecto"."fk_id_junta_vecinal" = "junta_vecinal"."id_junta_vecinal";
+    `;
+
+    const listreportes = await db.query(query, {
+      type: QueryTypes.SELECT,
+    });
+
+    console.log("listreportes", listreportes);
+    console.log(JSON.stringify(listreportes));
+
+    res.json({
+      data: listreportes,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
