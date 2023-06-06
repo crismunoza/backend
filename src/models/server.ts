@@ -10,10 +10,12 @@ import routajunta from "../routes/juntavecinal"
 import routacertificado from "../routes/certificados"
 import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
+import routareporte from "../routes/reporte"    
 
 import rutavaloraciones from "../routes/valoraciones"
 
 import { verificarTablas } from "./exists";
+import express from "express";
 
 
 
@@ -49,7 +51,8 @@ export class Server {
         this.app.use('/api/certificados', routacertificado);
         this.app.use('/api/solicitudes', routasolicitud);
         this.app.use('/api/valoraciones', rutavaloraciones);
-
+        this.app.use('/api/reporte', routareporte);
+        this.app.use(express.static('public'));
     }
     middlewares() {
         this.app.use(Express.json({ limit: '10mb' }));
