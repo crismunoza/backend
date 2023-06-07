@@ -1,29 +1,55 @@
 import fs from "fs"; // Importa el módulo fs para trabajar con el sistema de archivos
 import path from "path"; // Importa el módulo path para manejar rutas de archivos y directorios
 import { Request, Response } from "express"; // Importa los tipos Request y Response de Express
-import { Vecino } from "../models/mer"; // Importa el modelo Vecino desde ../models/mer
+import { Vecino, RepresentanteVecinal } from "../models/mer"; // Importa el modelo Vecino desde ../models/mer
 import { decodeBase64Image } from "../utils/imageUtils"; // Importa una función utilitaria para decodificar la imagen Base64
 import bcrypt from 'bcrypt';
 
 
+
+export const verificarsiexiste = async (req: Request, res: Response) => {
+  const { rut } = req.params;
+
+  try {
+      const verificarVecino = await Vecino.findOne({ where: { rut_vecino: rut } });
+      const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut } });
+
+      if (verificarVecino || verificarRepresentante) {
+          res.json({
+              msg: `correo existe`
+          });
+      } else {
+          res.json({
+              msg: `no esta`
+          });
+      }
+  } catch (error) {
+      console.log(error);
+      res.json({
+          msg: `Ups ocurrió un error, comuníquese con soporte`
+      });
+  }
+};
+
 // Aqui empieza el metodo para insertar vecinos modulo de registro de vecinos
 export const insertvecino = async (req: Request, res: Response) => {
-  const {
-    rut_vecino,
-    primer_nombre,
-    segundo_nombre,
-    primer_apellido,
-    segundo_apellido,
-    direccion,
-    correo_electronico,
-    telefono,
-    contrasenia,
-    avatar,
-    ruta_evidencia,
-    estado,
-    fk_id_junta_vecinal
-  } = req.body;
 
+    const {
+      rut_vecino,
+      primer_nombre,
+      segundo_nombre,
+      primer_apellido,
+      segundo_apellido,
+      direccion,
+      correo_electronico,
+      telefono,
+      contrasenia,
+      avatar,
+      ruta_evidencia,
+      estado,
+      fk_id_junta_vecinal
+    } = req.body;
+  
   const hashpasword = await bcrypt.hash(contrasenia, 10);
 
   try {
@@ -139,7 +165,6 @@ export const getvecinos = async (req: Request, res: Response) => {
       },
     });
 
-    console.log("listVecinos", listVecinos);
 
     return res.json({ listVecinos });
   } catch (error) {
