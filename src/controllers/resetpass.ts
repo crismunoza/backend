@@ -1,21 +1,47 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { usuario } from '../models/user';
+import { Vecino, RepresentanteVecinal } from "../models/mer";
 
 //metodo para cambiar contraseña
 
+export const verificarRut = async (req: Request, res: Response) => {
+    const { rut } = req.params;
+    try {
+        const verificarVecino = await Vecino.findOne({ where: { rut_vecino: rut } });
+        const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut } });
+
+        if (verificarVecino || verificarRepresentante) {
+            res.json({
+                msg: `ok`
+            });
+        } else {
+            res.json({
+                msg: `no esta`
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({
+            msg: `Ups ocurrió un error, comuníquese con soporte`
+        });
+    }
+};
+
+
 export const verificarCorreo = async (req: Request, res: Response) => {
-    const { correo } = req.query;
+    const { correo_electronico } = req.params;
     // console.log('ESTO ES EL BACKEND',correo)
     try {
-        const verificar = await usuario.findOne({ where: { correo } });
-        if (verificar ) {
+        const verificar = await Vecino.findOne({ where: { correo_electronico } });
+        const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { correo_electronico} });
+
+        if (verificar || verificarRepresentante) {
             res.json({
-                msg: `El correo ${correo} se encuentra registrado`
+                msg: `ok correo`
             });
         } else {
-            res.status(400).json({
-                msg: `No se encuentra registrado el correo ${correo}`
+            res.json({
+                msg: `no esta el correo`
             });
         }
     } catch (error) {
@@ -25,26 +51,36 @@ export const verificarCorreo = async (req: Request, res: Response) => {
         });
     }
 };
+
+
 export const cambiarContrasena = async (req: Request, res: Response) => {
-    const { correo, contrasena } = req.body;
+    const { rut, contrasenia } = req.body;
+
     try {
-        // console.log('ESTO ES EL BACKEND cambiarcontraseña',correo,contrasena)
-        const verificar = await usuario.findOne({ where: { correo } });
-        if (verificar) {
-            const hashpasword = await bcrypt.hash(contrasena, 10);
-            await verificar.update({ contrasena: hashpasword });
+        const verificarVecino = await Vecino.findOne({ where: { rut_vecino: rut } });
+        const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut } });
+        if (verificarVecino) {
+            const hashPassword = await bcrypt.hash(contrasenia, 10);
+            await verificarVecino.update({ contrasenia: hashPassword });
             res.json({
-                msg: 'Se actualizo la contraseña exitosamente'
+                msg: 'Se actualizó la contraseña exitosamente'
+            });
+        } else if (verificarRepresentante) {
+            const hashPassword = await bcrypt.hash(contrasenia, 10);
+            await verificarRepresentante.update({ contrasenia: hashPassword });
+            res.json({
+                msg: 'Se actualizó la contraseña exitosamente'
             });
         } else {
-            res.status(400).json({
-                msg: `No se encuentra registrado el correo ${correo}`
+            res.json({
+                msg: `Error al actualizar la contraseña`
             });
         }
     } catch (error) {
         console.log(error);
         res.json({
-            msg: `Upps ocurrio un error, comuniquese con soporte`
+            msg: `Ups ocurrió un error, comuníquese con soporte`
         });
     }
 };
+
