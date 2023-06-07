@@ -3,6 +3,8 @@ import { QueryTypes } from 'sequelize';
 import db from '../db/connection';
 import ExcelJS from 'exceljs';
 import fs from 'fs';
+import { Proyecto, Reporte } from '../models/mer';
+import { getMaxId } from '../models/queries';
 
 // Ruta para obtener el reporte por junta vecinal
 export const CrearReport = async (req: Request, res: Response) => {
@@ -28,7 +30,8 @@ export const CrearReport = async (req: Request, res: Response) => {
             "estado_proyecto"      NVARCHAR2(255),
             "fecha_proyecto"       NVARCHAR2(255),
             "cupo_min"             NUMBER(38,0),
-            "cupo_max"             NUMBER(38,0)
+            "cupo_max"             NUMBER(38,0),
+            "inscrito"             NVARCHAR2(255)
           )';
         EXCEPTION
           WHEN OTHERS THEN
@@ -58,7 +61,8 @@ export const CrearReport = async (req: Request, res: Response) => {
           "proyecto"."estado",
           "proyecto"."fecha_proyecto",
           "proyecto"."cupo_min",
-          "proyecto"."cupo_max"
+          "proyecto"."cupo_max",
+          "reporte"."inscrito"
         FROM
           "reporte"
           INNER JOIN "proyecto" ON "reporte"."fk_id_proyecto" = "proyecto"."id_proyecto"
@@ -99,6 +103,7 @@ export const CrearReport = async (req: Request, res: Response) => {
       fecha_proyecto: 'Fecha Proyecto',
       cupo_min: 'Cupo Mínimo',
       cupo_max: ' Cupo Máximo',
+      inscrito: 'Inscrito'
     };
 
     // Agregar los encabezados de columna personalizados al archivo Excel
@@ -157,7 +162,8 @@ export const verreporte = async (req: Request, res: Response) => {
         "proyecto"."estado",
         "proyecto"."fecha_proyecto",
         "proyecto"."cupo_min",
-        "proyecto"."cupo_max"
+        "proyecto"."cupo_max",
+        "reporte"."inscrito"
       FROM
         "reporte"
         INNER JOIN "proyecto" ON "reporte"."fk_id_proyecto" = "proyecto"."id_proyecto"
@@ -179,3 +185,66 @@ export const verreporte = async (req: Request, res: Response) => {
     console.log(e);
   }
 };
+
+export const inserReport = async (req:Request, res: Response) => {
+  try{
+    const { id_proyecto, rut, inscrito } = req.body;
+    const idReporteFormmated = await getMaxId('Reporte', 'id_reporte');
+
+    const nuevoReporte = await Reporte.create({
+      id_reporte: idReporteFormmated,
+      rut_vecino: rut,
+      inscrito,
+      fk_id_proyecto: id_proyecto
+    });
+
+    const proyecto = await Proyecto.findOne({ where: { id_proyecto: id_proyecto } });
+
+    if (proyecto && inscrito === 'SI'){
+      const cupoMaxFormmated = Number(proyecto.dataValues.cupo_max) - 1;
+      await Proyecto.update(
+        {cupo_max: cupoMaxFormmated},
+        {where: {id_proyecto}}
+      ); 
+    }else{
+      if (proyecto && inscrito === 'NO'){
+        return res.status(200).json({ resp: 'No te has inscrito en este proyecto' });
+      }else{
+        return res.status(500).json({ resp: 'Error al inscribirse al proyecto', error: '0' });
+      }
+    }
+    
+    return res.status(200).json({ resp: `Inscripción realizada con éxito` });
+  } catch (error) {
+    console.log('error al insertar el reporte.', error)
+    return res.status(500).json({ resp: 'Error al inscribirse al proyecto', error: '0' });
+
+  }
+
+};
+
+export const getReport = async (req: Request, res: Response) => {
+  try {
+    const rutVecino = req.params.rut_vecino;
+    const reports = await Reporte.findAll({ where: { rut_vecino: rutVecino } });
+    return res.status(200).json(reports);
+  } catch (error) {
+    return res.status(500).json({ resp: "Error al obtener los reportes", error: '0' });
+  }
+};
+
+export async function getVecinosInscritos(req: Request, res: Response): Promise<void> {
+  const idProyecto = req.params.id_proyecto;
+
+  try {
+    const count = await Reporte.count({
+      where:{
+      fk_id_proyecto: idProyecto,
+      inscrito: 'SI'}
+    });
+
+    res.status(200).json(count);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener el recuento de vecinos inscritos' });
+  }
+}

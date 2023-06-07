@@ -3,6 +3,7 @@ npm install qrcode --save
 npm install pdfkit --save
 npm install concurrently --save-dev
 npm install @sendgrid/mail
+npm install exceljs
 
 ---------importante-----------
 Para ejecutar la aplicación en su totalidad agregar este script en el archivo package.json:

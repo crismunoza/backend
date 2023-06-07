@@ -136,6 +136,10 @@ export const Reporte = sequelize.define('Reporte', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    inscrito: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     fk_id_proyecto:{
         type: DataTypes.INTEGER,
         allowNull: false
