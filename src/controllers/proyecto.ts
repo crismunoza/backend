@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Proyecto, RepresentanteVecinal } from '../models/mer';
+import { Proyecto, Reporte, RepresentanteVecinal } from '../models/mer';
 import { ProyectoType } from '../types/types';
 import { getMaxId } from '../models/queries';
 import { SQLTableNameValues, SQLTableProyect } from '../types/sqlTypes';
@@ -7,6 +7,7 @@ import { convertUpperCASE, deleteSpace, formatDate, parserUpperWord } from '../s
 import { decodeBase64Image } from "../utils/imageUtils";
 import path from "path";
 import fs from "fs";
+import * as ExcelJS from 'exceljs';
 
 
 class ProyectoController {
@@ -170,7 +171,115 @@ class ProyectoController {
       res.status(500).json({ message: 'Error al obtener la imagen' });
     }
   };
-}  
+
+  generateExcel = async (req: Request, res: Response) => {
+    const { id_proyecto } = req.params;
+    
+    const proyecto = await Proyecto.findByPk(id_proyecto);
+
+    if (!proyecto) {
+      return res.status(404).json({ error: 'Proyecto no encontrado' });
+    }
+    const count = await Reporte.count({
+      where:{
+      fk_id_proyecto: id_proyecto,
+      inscrito: 'SI'}
+    });
+    
+    const nameExcel = deleteSpace(proyecto.dataValues.nombre);
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet(`proyecto-${nameExcel}`);
+    
+    //se agregan los datos del proyecto a las celdas
+    worksheet.getCell('A1').value = 'ID Proyecto';
+    worksheet.getCell('A1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('A2').value = proyecto.dataValues.id_proyecto;
+    worksheet.getCell('B1').value = 'Nombre Proyecto';
+    worksheet.getCell('B1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('B2').value = proyecto.dataValues.nombre;
+    worksheet.getCell('C1').value = 'Descripción';
+    worksheet.getCell('C1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('C2').value = proyecto.dataValues.descripcion;
+    worksheet.getCell('D1').value = 'Cupo Mínimo';
+    worksheet.getCell('D1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('D2').value = proyecto.dataValues.cupo_min;
+    worksheet.getCell('E1').value = 'Cupo Máximo';
+    worksheet.getCell('E1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('E2').value = proyecto.dataValues.cupo_max;
+    worksheet.getCell('F1').value = 'Inscritos';
+    worksheet.getCell('F1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('F2').value = count;
+    worksheet.getCell('G1').value = 'Estado';
+    worksheet.getCell('G1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('G2').value = proyecto.dataValues.estado;
+    worksheet.getCell('H1').value = 'Fecha Proyecto';
+    worksheet.getCell('H1').style = {
+      font: {
+        bold: true
+      }
+    };
+    worksheet.getCell('H2').value = proyecto.dataValues.fecha_proyecto;
+    worksheet.columns.forEach((column) => {
+      column.width = 20;
+    });
+    //configura el encabezado de la respuesta para indicar que es un archivo Excel.
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename=proyecto-${nameExcel}.xlsx`);
+    //envía el archivo Excel al frontend.
+    workbook.xlsx.write(res)
+      .then(() => res.end())
+      .catch(error => {
+        console.error('Error al generar el archivo Excel:', error);
+        res.status(500).json({ error: 'Error al generar el archivo Excel' });
+      });
+  }
+
+  getFiltersForModify = async (req: Request, res: Response) => {
+    try {
+      const existingEstados = await (await Proyecto.findAll({
+        attributes: ['estado'],
+        group: ['estado']
+      })).map((estado: any) => estado.estado);
+  
+      const requiredEstados = ['ACTIVO', 'CERRADO'];
+      const missingEstados = requiredEstados.filter(estado => !existingEstados.includes(estado));
+      
+      const estadosToSend = [...existingEstados, ...missingEstados];
+        
+      return res.status(200).json(estadosToSend);
+    } catch (error) {
+      return res.status(500).json({ resp: "Error al obtener los filtros para modificar el proyecto", error: '0' });
+    }
+  };
+};  
 const proyectoController = new ProyectoController();
 
 export default proyectoController;
