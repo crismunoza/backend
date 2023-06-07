@@ -39,7 +39,7 @@ export const ObtenerEstrellas =async (req:Request, res:Response) => {
         from "junta_vecinal" 
         left JOIN "vecino" on "junta_vecinal"."id_junta_vecinal"="vecino"."fk_id_junta_vecinal" 
         left JOIN "valoracion" on "vecino"."id_vecino"="valoracion"."fk_id_vecino" 
-        where "junta_vecinal"."id_junta_vecinal" =${id}`;
+        where "junta_vecinal"."id_junta_vecinal" =${id} `;
         const estrellas = await db.query(q, {
             type: QueryTypes.SELECT,
           }); 
@@ -53,10 +53,11 @@ export const listarValoraciones = async (req:Request, res:Response) => {
     var respuest:any = '' ;
 
     try{
-        const b = `select "vecino"."primer_nombre"|| '' ||"vecino"."primer_apellido" || '' ||"vecino"."segundo_apellido" as "vecino","valoracion"."cantidad_estrellas" as "estrellas","valoracion"."comentario" as "comentario"
-        from "junta_vecinal" 
-        left JOIN "vecino" on "junta_vecinal"."id_junta_vecinal"="vecino"."fk_id_junta_vecinal" 
-        left JOIN "valoracion" on "vecino"."id_vecino"="valoracion"."fk_id_vecino" where "junta_vecinal"."id_junta_vecinal" =${id_junta}`;
+        const b = `select "vecino"."primer_nombre"|| ' ' ||"vecino"."primer_apellido" || ' ' ||"vecino"."segundo_apellido" as "vecino","valoracion"."cantidad_estrellas" as "estrellas","valoracion"."comentario" as "comentario"
+        from "valoracion"        
+        LEFT JOIN "vecino" on "vecino"."id_vecino"="valoracion"."fk_id_vecino"
+         Left JOIN "junta_vecinal" on "vecino"."fk_id_junta_vecinal"="junta_vecinal"."id_junta_vecinal" 
+        where "junta_vecinal"."id_junta_vecinal"=${id_junta}`;
         const valoraciones = await db.query(b, {
             type: QueryTypes.SELECT,
         }); 
