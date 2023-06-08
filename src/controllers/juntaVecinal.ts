@@ -120,4 +120,18 @@ export const inserRep = async(req:Request, res : Response)=>{
         console.log('hay un error')
     }
 };
+
+export const cantRep = async (req:Request, res:Response) => {
+    const id = req.params.id_junta;
+    try{    
+        const {count,rows} = await RepresentanteVecinal.findAndCountAll({where:{fk_id_junta_vecinal:id}});
+        if(!count){
+            return res.json({ status:400,respuesta:'no se econtraron datos'});   
+        }
+        return res.json({ status:200,respuesta:count});
+    }
+    catch(error){
+      return res.json({status:404, respuesta:error});
+    }
+};
    
