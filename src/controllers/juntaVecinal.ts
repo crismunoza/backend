@@ -133,5 +133,4 @@ export const cantRep = async (req:Request, res:Response) => {
     catch(error){
       return res.json({status:404, respuesta:error});
     }
-};
-   
+};   
