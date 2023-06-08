@@ -1,5 +1,5 @@
  import { Router } from "express";
-import { UpdateProfile, getDataUser, login, profile } from "../controllers/user";
+import { UpdateClave, UpdateProfile, getDataUser, login, profile } from "../controllers/user";
 // import {verificarCorreo,cambiarContrasena } from "../controllers/resetpass";
 // //creacion de la ruta para los usuarios
  const router = Router();
@@ -8,5 +8,6 @@ router.post('/ingresar', login);
 router.get('/profile',profile);
 router.get('/data',getDataUser);
 router.put('/update-perfil/:id_us',UpdateProfile);
+router.put('/update-clave/:id', UpdateClave)
 
  export default router;

@@ -8,8 +8,6 @@ import { JuntaVecinal, RepresentanteVecinal, Vecino } from '../models/mer';
 export const login = async (req :Request, res : Response)=>{
   console.log('entra al loggin')
   const {rut,contrasenia,tipo_user} = req.body;
-  console.log('que viene en tipo de usuario ',tipo_user)
-  console.log('que contraseia viene ',contrasenia)
   var respuesta = '';
   var rol = '';
 
@@ -196,6 +194,40 @@ export const UpdateProfile = async ( req:Request,res:Response)=>{
   }
   catch(error){console.log(error)}
   
+};
+
+export const UpdateClave = async (req:Request, res:Response)=>{
+  const id = req.params.id;
+  const {rol, contraActual, contraNva} = req.body;
+  try{
+    if(rol === 'admin'){
+      const passValid:any = await RepresentanteVecinal.findOne({ where:{id_representante_vecinal:id} });      
+      const validPassword = await bcrypt.compare(contraActual,passValid.contrasenia);
+      if(passValid === null || validPassword === false){
+        return res.json({ status: 400, respuesta:'Clave Actual invalida'});
+      }
+      else{
+        const passhash = await bcrypt.hash(contraNva,10);
+        await RepresentanteVecinal.update({contrasenia:passhash},{where:{id_representante_vecinal:id}});
+        return res.json({ status:200, respuesta:'Contraseña Cambiada con exito'});
+      }
+    }
+    else{
+      const passValid:any = await Vecino.findOne({ where:{id_vecino:id, contrasenia:contraActual} });
+      const validPassword = await bcrypt.compare(contraActual,passValid.contrasenia);
+      if(passValid === null || validPassword === false){
+        return res.json({ status: 400, respuesta:'Clave Actual invalida'});
+      }
+      else{
+        const passhash = await bcrypt.hash(contraNva,10);
+        await Vecino.update({contrasenia:passhash},{where:{id_vecino:id}});
+        return res.json({ status:200, respuesta:'Contraseña Cambiada con exito'});
+      }
+    }
+  }
+  catch(error){
+    return res.json({ status : error });
+  }
 };
 
 
