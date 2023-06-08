@@ -12,6 +12,7 @@ import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
 import routareporte from "../routes/reporte"    
 
+
 import rutavaloraciones from "../routes/valoraciones"
 
 import { verificarTablas } from "./exists";
