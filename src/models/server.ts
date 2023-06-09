@@ -10,6 +10,7 @@ import routajunta from "../routes/juntavecinal"
 import routacertificado from "../routes/certificados"
 import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
+import routacontac from "../routes/vercontacto"  
 import routareporte from "../routes/reporte"   
 
 import rutavaloraciones from "../routes/valoraciones"
@@ -52,6 +53,7 @@ export class Server {
         this.app.use('/api/solicitudes', routasolicitud);
         this.app.use('/api/valoraciones', rutavaloraciones);
         this.app.use('/api/reporte', routareporte);
+        this.app.use('/api/vercontacto', routacontac);
         this.app.use(express.static('public'));
     }
     middlewares() {
