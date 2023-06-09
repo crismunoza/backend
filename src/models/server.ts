@@ -10,9 +10,8 @@ import routajunta from "../routes/juntavecinal"
 import routacertificado from "../routes/certificados"
 import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
-import routareporte from "../routes/reporte"  
 import routacontac from "../routes/vercontacto"  
-
+import routareporte from "../routes/reporte"   
 
 import rutavaloraciones from "../routes/valoraciones"
 

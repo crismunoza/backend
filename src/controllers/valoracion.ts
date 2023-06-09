@@ -4,6 +4,9 @@ import { Valoracion } from '../models/mer';
 import { QueryTypes, json } from 'sequelize';
 import db from '../db/connection';
 
+
+
+
 export const enviarSolicitud = async (req: Request, res: Response) => {
     const {opinion,estrellas,id_v} = req.body;
 
@@ -15,6 +18,7 @@ export const enviarSolicitud = async (req: Request, res: Response) => {
             fk_id_vecino:id_v
         });
         if(valo){
+            
             res.json({'status':200,'msg':'ok'});
         }
         

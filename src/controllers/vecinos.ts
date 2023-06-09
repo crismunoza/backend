@@ -4,8 +4,16 @@ import { Request, Response } from "express"; // Importa los tipos Request y Resp
 import { Vecino, RepresentanteVecinal } from "../models/mer"; // Importa el modelo Vecino desde ../models/mer
 import { decodeBase64Image } from "../utils/imageUtils"; // Importa una función utilitaria para decodificar la imagen Base64
 import bcrypt from 'bcrypt';
+const nodemailer = require('nodemailer');
 
-
+// Configurar el transporte
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'juntaaunclick@gmail.com',
+    pass: 'mepwksjzhmnwmtpq'
+  }
+});
 
 export const verificarsiexiste = async (req: Request, res: Response) => {
   const { rut } = req.params;
@@ -155,7 +163,6 @@ export const updatevecino = async (req: Request, res: Response) => {
 }
 
 
-
 export const getvecinos = async (req: Request, res: Response) => {
   try {
     // Obtiene todos los vecinos de la base de datos con evidencia igual a true (1)
@@ -255,8 +262,23 @@ export const modificarEstado = async (req: Request, res: Response) => {
   try {
     const { rut_vecino, estado } = req.body;
 
-    // Buscar el vecino por el rut y modificar el estado
+    const mailVecino: any = await Vecino.findOne({where:{rut_vecino:rut_vecino}});
+    const mailOptions = {
+      from: 'juntaaunclick@gmail.com',
+      to: mailVecino.correo_electronico,
+      subject: 'Bienvenid@ a Junta a un Click',
+      html: "<body><h1>¡Bienvenid@!</h1><p>Un representante te ha otorgado acceso a la junta vecinal a la que te registraste.</p><p style='color: rgb(199, 0, 57);'><h3>**RECUERDA QUE DEBES INGRESAR CON TU RUT y LA CLAVE QUE REGISTRASTE</h3></p><img src='https://www.shutterstock.com/image-vector/welcome-poster-spectrum-brush-strokes-260nw-1146069941.jpg' width='400px' height='200px'><p>Ahora puedes acceder a nuestro sitio, sigue el siguiente enlace <a href='http://localhost:4200/login'>ir al sitio</a></p></body>",
+    };
+    
+    //Buscar el vecino por el rut y modificar el estado
     await Vecino.update({ estado: estado }, { where: { rut_vecino: rut_vecino } });
+    transporter.sendMail(mailOptions, (error: any, info: { response: string; }) => {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Correo electrónico enviado: ' + info.response);
+      }
+    });
 
     return res.status(200).json({ message: 'Estado modificado correctamente' });
   } catch (error) {
