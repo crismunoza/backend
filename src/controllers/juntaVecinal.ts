@@ -126,7 +126,7 @@ export const cantRep = async (req:Request, res:Response) => {
     try{    
         const {count,rows} = await RepresentanteVecinal.findAndCountAll({where:{fk_id_junta_vecinal:id}});
         if(!count){
-            return res.json({ status:400,respuesta:'no se econtraron datos'});   
+            return res.json({ status:400,respuesta:'no se encontraron datos'});   
         }
         return res.json({ status:200,respuesta:count});
     }
