@@ -1,86 +1,120 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import { Vecino, RepresentanteVecinal } from "../models/mer";
+const nodemailer = require('nodemailer');
 
+
+// Configurar el transporte
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: 'juntaaunclick@gmail.com',
+      pass: 'mepwksjzhmnwmtpq'
+    }
+  });
 //metodo para cambiar contraseña
 
-export const verificarRut = async (req: Request, res: Response) => {
-    const { rut } = req.params;
-    try {
-        const verificarVecino = await Vecino.findOne({ where: { rut_vecino: rut } });
-        const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut } });
-
-        if (verificarVecino || verificarRepresentante) {
-            res.json({
-                msg: `ok`
-            });
-        } else {
-            res.json({
-                msg: `no esta`
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        res.json({
-            msg: `Ups ocurrió un error, comuníquese con soporte`
-        });
-    }
-};
-
-
-export const verificarCorreo = async (req: Request, res: Response) => {
-    const { correo_electronico } = req.params;
-    // console.log('ESTO ES EL BACKEND',correo)
-    try {
-        const verificar = await Vecino.findOne({ where: { correo_electronico } });
-        const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { correo_electronico} });
-
-        if (verificar || verificarRepresentante) {
-            res.json({
-                msg: `ok correo`
-            });
-        } else {
-            res.json({
-                msg: `no esta el correo`
-            });
-        }
-    } catch (error) {
-        console.log(error);
-        res.json({
-            msg: `Upps ocurrio un error, comuniquese con soporte`
-        });
-    }
-};
-
-
 export const cambiarContrasena = async (req: Request, res: Response) => {
-    const { rut, contrasenia } = req.body;
-
+    const { rut, correo_electronico } = req.body;
+    
     try {
-        const verificarVecino = await Vecino.findOne({ where: { rut_vecino: rut } });
-        const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut } });
-        if (verificarVecino) {
-            const hashPassword = await bcrypt.hash(contrasenia, 10);
+      const verificarVecino = await Vecino.findOne({ where: { rut_vecino: rut, correo_electronico } });
+      const verificarRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut, correo_electronico } });
+  
+      if (verificarVecino) {
+            const nuevaContrasenia = generarContrasenaAleatoria(8); // Genera una contraseña aleatoria
+            const hashPassword = await bcrypt.hash(nuevaContrasenia, 10);
             await verificarVecino.update({ contrasenia: hashPassword });
-            res.json({
-                msg: 'Se actualizó la contraseña exitosamente'
-            });
-        } else if (verificarRepresentante) {
-            const hashPassword = await bcrypt.hash(contrasenia, 10);
+            console.log("CONTRANUEVA",nuevaContrasenia);
+            const contenidoCorreo = `<body>
+            <h1>¡Restablecimiento de Contraseña!</h1>
+            <p>Has solicitado restablecer tu contraseña. Copia y pega la nueva contraseña para ingresar al sistema nuevamente.</p>
+            <p style="color: rgb(199, 0, 57);"><h3>**Nueva Contraseña**</h3></p>
+            ${nuevaContrasenia}
+            <p>Ahora puedes ingresar a nuestro sitio.</p>
+            <p><a href='http://localhost:4200/login'>Ir al sitio</a></p>
+            </body>                      
+            `;
+            await enviarCorreo(correo_electronico, 'Restablecimiento de Contraseña', contenidoCorreo); //se debe descomentar para usar el envio de correo
+        
+        res.json({
+          msg: 'ok'
+        });
+      } else if (verificarRepresentante) {
+            const nuevaContrasenia = generarContrasenaAleatoria(8); // Genera una contraseña aleatoria
+            const hashPassword = await bcrypt.hash(nuevaContrasenia, 10);
             await verificarRepresentante.update({ contrasenia: hashPassword });
+            console.log("CONTRANUEVA",nuevaContrasenia);
+            const contenidoCorreo = `<body>
+            <h1>¡Restablecimiento de Contraseña!</h1>
+            <p>Has solicitado restablecer tu contraseña. Copia y pega la nueva contraseña para ingresar al sistema nuevamente.</p>
+            <p style="color: rgb(199, 0, 57);"><h3>**Nueva Contraseña**</h3></p>
+            ${nuevaContrasenia}
+            <p>Ahora puedes ingresar a nuestro sitio.</p>
+            <p><a href='http://localhost:4200/login'>Ir al sitio</a></p>
+            </body>                      
+            `;
+            await enviarCorreo(correo_electronico, 'Restablecimiento de Contraseña', contenidoCorreo); //se debe descomentar para usar el envio de correo
+        
+        res.json({
+          msg: 'ok'
+        });
+      } else {
+        // Verificar si el rut existe en la base de datos
+        const verificarSoloRutVecino = await Vecino.findOne({ where: { rut_vecino: rut } });
+        const verificarSoloRutRepresentante = await RepresentanteVecinal.findOne({ where: { rut_representante: rut } });
+        if (verificarSoloRutVecino) {
             res.json({
-                msg: 'Se actualizó la contraseña exitosamente'
+              msg: 'okrut',
+              error: 'correo_incorrecto'
             });
-        } else {
+          } else if (verificarSoloRutRepresentante) {
             res.json({
-                msg: `Error al actualizar la contraseña`
+              msg: 'okrut',
+              error: 'correo_incorrecto'
+            });
+          } else {
+            res.json({
+              msg: 'okrut',
+              error: 'rut_inexistente'
             });
         }
+      }
     } catch (error) {
-        console.log(error);
-        res.json({
-            msg: `Ups ocurrió un error, comuníquese con soporte`
-        });
+      console.log(error);
+      res.json({
+        msg: 'Ups ocurrió un error, comuníquese con soporte'
+      });
     }
-};
+  };
+  
 
+  const generarContrasenaAleatoria = (longitud: number) => {
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let contrasena = '';
+  
+    for (let i = 0; i < longitud; i++) {
+      const indice = Math.floor(Math.random() * caracteres.length);
+      contrasena += caracteres.charAt(indice);
+    }
+  
+    return contrasena;
+  };
+
+// Función para enviar correo electrónico
+const enviarCorreo = async (destinatario: string, asunto: string, contenido: string) => {
+    try {
+      const mailOptions = {
+        from: 'juntaaunclick@gmail.com',
+        to: destinatario,
+        subject: asunto,
+        html: contenido
+      };
+  
+      await transporter.sendMail(mailOptions);
+      console.log(`Correo enviado a ${destinatario}`);
+    } catch (error) {
+      console.log('Error al enviar el correo:', error);
+    }
+  };
+  
