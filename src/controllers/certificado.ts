@@ -4,13 +4,20 @@ import { convertUpperCASE, covertFirstCapitalLetterWithSpace, removeAccents } fr
 import { getMaxId } from '../models/queries';
 const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 //necesario para utilizar la key de sendgrid almacenada en .env
 import dotenv from 'dotenv';
+// Configurar el transporte
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'juntaaunclick@gmail.com',
+    pass: 'mepwksjzhmnwmtpq'
+  }
+});
 
-dotenv.config();
-const sendgridApiKey = process.env.SENDGRID_API_KEY;
-sgMail.setApiKey(sendgridApiKey);
+
+
 
 
 let subtitleValue = { subtitle: 'Fines generales' };
@@ -274,49 +281,38 @@ export const getParagraph = async (req: Request, res: Response) =>{
   }
 };
 
-export const sendCertifyEmail = async () => {
+export const Enviocerti = async (req: Request, res: Response) => {
   try {
     const certFile = await generateCertificate();
-    const msg = {
-      to: 'jsmc.proyect@gmail.com',
-      from: 'jsmc.proyect@gmail.com',
+    
+    const mailOptions = {
+      from: 'juntaaunclick@gmail.com',
+      to: emailNeighbor.email,
       subject: 'Certificado De Domicilio',
       html: `
         <p>Estimado/a: </p>
         <strong>${nameNeighbor.nombre}</strong>
-        <p>Adjunto encontrarás el certificado de domicilio emitido por la ${juntaVecinal.nombre}.</p>
+        <p>Adjunto encontrarás el certificado de domicilio emitido por${juntaVecinal.nombre}.</p>
         <p>Atentamente.</p>
         <strong>${nameRepresentanteVecinal.nombre}</strong><br>
         <strong>Representante ${juntaVecinal.nombre}</strong>
       `,
-      attachments : [
+      attachments: [
         {
           filename: 'certificadothis.juntaVecinal.pdf',
-          content: certFile.toString('base64'),
-          type: 'application/pdf',
+          content: certFile,
         },
       ],
-      //reenvio de correos.
-      bcc: [`${emailNeighbor.email}`],
     };
 
-    //envio del correo electrónico con el certificado adjunto
-    await sgMail.send(msg);
-    
-    return { resp: 'Correo electrónico enviado con éxito' };
-  } catch (error) {
-    console.error('Error al enviar el correo electrónico', error);
-    throw new Error('Error al enviar el certificado');
-  }
-};
+    // Envío del correo electrónico con el certificado adjunto
+    await transporter.sendMail(mailOptions);
 
-export const sendEmail = async (req: Request, res: Response) => {
-  try {
-    await sendCertifyEmail();
-    const emailFormmatedNeighbor = convertUpperCASE(emailNeighbor.email); 
-    return res.status(200).json({ resp: `Certificado enviado con éxito al destinatario: ${emailFormmatedNeighbor}` });
+    return res.status(200).json({ resp: `Certificado enviado con éxito al destinatario: ${emailNeighbor.email}` });
   } catch (error) {
     console.error('Error al enviar el correo electrónico', error);
     return res.status(500).json({ resp: 'Error al enviar el certificado', error: '0' });
   }
 };
+
+

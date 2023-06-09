@@ -28,12 +28,14 @@ export const cambiarContrasena = async (req: Request, res: Response) => {
             console.log("CONTRANUEVA",nuevaContrasenia);
             const contenidoCorreo = `<body>
             <h1>¡Restablecimiento de Contraseña!</h1>
-            <p>Has solicitado restablecer tu contraseña. Copia y pega la nueva contraseña para ingresar al sistema nuevamente.</p>
+            <p>Has solicitado restablecer tu contraseña.</p>
+            <p>Recuerda que siempre podrás cambiar tu contraseña una vez ingreses al sistema. Para ello, dirígete a tu perfil, haz clic en "Configuración de Perfil" y encontrarás la sección de "Clave".</p>
+            <p>En el apartado de "Clave Actual", ingresa la contraseña proporcionada en este correo y luego ingresa la "Nueva Clave" de tu elección.</p>
             <p style="color: rgb(199, 0, 57);"><h3>**Nueva Contraseña**</h3></p>
-            ${nuevaContrasenia}
+            <p>Esta es tu nueva contraseña: ${nuevaContrasenia}</p>
             <p>Ahora puedes ingresar a nuestro sitio.</p>
-            <p><a href='http://localhost:4200/login'>Ir al sitio</a></p>
-            </body>                      
+            <p><a href="http://localhost:4200/login">Ir al sitio</a></p>
+            </body>                       
             `;
             await enviarCorreo(correo_electronico, 'Restablecimiento de Contraseña', contenidoCorreo); //se debe descomentar para usar el envio de correo
         
@@ -47,12 +49,14 @@ export const cambiarContrasena = async (req: Request, res: Response) => {
             console.log("CONTRANUEVA",nuevaContrasenia);
             const contenidoCorreo = `<body>
             <h1>¡Restablecimiento de Contraseña!</h1>
-            <p>Has solicitado restablecer tu contraseña. Copia y pega la nueva contraseña para ingresar al sistema nuevamente.</p>
+            <p>Has solicitado restablecer tu contraseña.</p>
+            <p>Recuerda que siempre podrás cambiar tu contraseña una vez ingreses al sistema. Para ello, dirígete a tu perfil, haz clic en "Configuración de Perfil" y encontrarás la sección de "Clave".</p>
+            <p>En el apartado de "Clave Actual", ingresa la contraseña proporcionada en este correo y luego ingresa la "Nueva Clave" de tu elección.</p>
             <p style="color: rgb(199, 0, 57);"><h3>**Nueva Contraseña**</h3></p>
-            ${nuevaContrasenia}
+            <p>Esta es tu nueva contraseña: ${nuevaContrasenia}</p>
             <p>Ahora puedes ingresar a nuestro sitio.</p>
-            <p><a href='http://localhost:4200/login'>Ir al sitio</a></p>
-            </body>                      
+            <p><a href="http://localhost:4200/login">Ir al sitio</a></p>
+          </body>                         
             `;
             await enviarCorreo(correo_electronico, 'Restablecimiento de Contraseña', contenidoCorreo); //se debe descomentar para usar el envio de correo
         
