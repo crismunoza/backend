@@ -213,7 +213,8 @@ export const UpdateClave = async (req:Request, res:Response)=>{
       }
     }
     else{
-      const passValid:any = await Vecino.findOne({ where:{id_vecino:id, contrasenia:contraActual} });
+
+      const passValid:any = await Vecino.findOne({ where:{id_vecino:id},attributes:['contrasenia'] });
       const validPassword = await bcrypt.compare(contraActual,passValid.contrasenia);
       if(passValid === null || validPassword === false){
         return res.json({ status: 400, respuesta:'Clave Actual invalida'});

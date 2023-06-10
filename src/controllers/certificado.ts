@@ -6,7 +6,6 @@ const PDFDocument = require('pdfkit');
 const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
 //necesario para utilizar la key de sendgrid almacenada en .env
-import dotenv from 'dotenv';
 // Configurar el transporte
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -15,11 +14,7 @@ const transporter = nodemailer.createTransport({
     pass: 'mepwksjzhmnwmtpq'
   }
 });
-
-
-
-
-
+// Configurar el email
 let subtitleValue = { subtitle: 'Fines generales' };
 let rutNeighbor = {rut: ''};
 let juntaVecinal = {nombre: ''};
