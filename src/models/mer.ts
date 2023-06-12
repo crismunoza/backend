@@ -125,6 +125,8 @@ export const Proyecto = sequelize.define('Proyecto', {
     timestamps: false,
     tableName: 'proyecto'
 });
+JuntaVecinal.hasMany(Proyecto, { foreignKey: 'fk_id_junta_vecinal' });
+Proyecto.belongsTo(JuntaVecinal, { foreignKey: 'fk_id_junta_vecinal' });
 
 export const Reporte = sequelize.define('Reporte', {
     id_reporte: { 
@@ -150,6 +152,8 @@ export const Reporte = sequelize.define('Reporte', {
         timestamps: false,
         tableName: 'reporte'
 });
+Proyecto.hasMany(Reporte, { foreignKey: 'fk_id_proyecto' });
+Reporte.belongsTo(Proyecto, { foreignKey: 'fk_id_proyecto' });
 
 export const RepresentanteVecinal = sequelize.define('RepresentanteVecinal', {
     id_representante_vecinal: { 
@@ -269,7 +273,8 @@ export const Actividad = sequelize.define('Actividad', {
     timestamps: false,
     tableName: 'actividad'
 });
-
+RepresentanteVecinal.hasMany(Actividad, { foreignKey: 'fk_id_representante_vecinal' });
+Actividad.belongsTo(RepresentanteVecinal, { foreignKey: 'fk_id_representante_vecinal' });
 export const Vecino = sequelize.define('Vecino', {
     id_vecino: { 
         type: DataTypes.INTEGER,

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { Proyecto, Reporte, RepresentanteVecinal } from '../models/mer';
+import { JuntaVecinal, Proyecto, Reporte, RepresentanteVecinal, Vecino } from '../models/mer';
 import { ProyectoType } from '../types/types';
-import { getMaxId } from '../models/queries';
+import { getMaxId, getProyects } from '../models/queries';
 import { SQLTableNameValues, SQLTableProyect } from '../types/sqlTypes';
-import { convertUpperCASE, deleteSpace, formatDate, parserUpperWord } from '../services/parser'
+import { convertToLowerCase, convertUpperCASE, covertFirstCapitalLetterWithSpace, deleteSpace, formatDate, parserUpperWord } from '../services/parser'
 import { decodeBase64Image } from "../utils/imageUtils";
 import path from "path";
 import fs from "fs";
@@ -13,10 +13,12 @@ import * as ExcelJS from 'exceljs';
 class ProyectoController {
   private readonly modelName: string;
   private readonly estatApply: string;
+
   constructor() {
     this.modelName = SQLTableNameValues.proyecto;
     this.estatApply = SQLTableProyect.estado;
   }
+  
   insertProyect = async (req: Request, res: Response) => {
     try {
         let fk_id_junta_vecinal;
@@ -42,7 +44,8 @@ class ProyectoController {
         //**guardado de imagen */
         const imageBuffer = decodeBase64Image(image);
         const nombreImagen = deleteSpace(nombreProyecto);
-        const imageName = `${nombreImagen}.png`;
+        const nombreImagenFormmated = convertToLowerCase(nombreImagen);
+        const imageName = `${nombreImagenFormmated}.png`;
         const imageFolder = path.join(__dirname, "../../public/images/proyectos");
         const imagePath = path.join(imageFolder, imageName);
         if (!fs.existsSync(imagePath)) {
@@ -90,8 +93,8 @@ class ProyectoController {
 
   getProyects = async (req: Request, res: Response) => {
     try {
-      const allProyects = await Proyecto.findAll();
-      return res.status(200).json(allProyects);
+      const proyects = await getProyects(parseInt(req.params.idJuntaVecinal));
+      return res.status(200).json(proyects);
     } catch (error) {
       return res.status(500).json({ resp: "Error al obtener los proyectos", error: '0' });
     }
@@ -175,8 +178,25 @@ class ProyectoController {
   generateExcel = async (req: Request, res: Response) => {
     const { id_proyecto } = req.params;
     
-    const proyecto = await Proyecto.findByPk(id_proyecto);
-
+    const proyecto = await Proyecto.findAll({
+      where: {id_proyecto: id_proyecto},
+      attributes: ['nombre', 'descripcion', 'cupo_min', 'cupo_max', 'estado', 'fecha_proyecto'],
+      include: [
+        {
+          model: JuntaVecinal,
+          attributes: ['razon_social'],
+          include: [
+            {
+              model: Vecino,
+              attributes: ['rut_vecino', 'primer_nombre', 'segundo_nombre', 'primer_apellido', 'segundo_apellido', 'direccion', 'correo_electronico', 'telefono']
+            }
+          ]
+        }
+      ]
+    });
+    console.log(proyecto)
+    const nameJuntaVecinalFormmated = covertFirstCapitalLetterWithSpace(proyecto[0].dataValues.JuntaVecinal.razon_social);
+    
     if (!proyecto) {
       return res.status(404).json({ error: 'Proyecto no encontrado' });
     }
@@ -186,69 +206,161 @@ class ProyectoController {
       inscrito: 'SI'}
     });
     
-    const nameExcel = deleteSpace(proyecto.dataValues.nombre);
+    const proyectoEnReportes = await Reporte.findOne({
+      where: {
+        fk_id_proyecto: id_proyecto
+      },
+      attributes: ['inscrito']
+    });
+
+    const nameExcel = deleteSpace(proyecto[0].dataValues.nombre);
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(`proyecto-${nameExcel}`);
-    
+    const worksheet = workbook.addWorksheet(`proyecto-${nameExcel}`);    
     //se agregan los datos del proyecto a las celdas
-    worksheet.getCell('A1').value = 'ID Proyecto';
+    worksheet.getCell('A1').value = 'Junta Vecinal';
     worksheet.getCell('A1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('A2').value = proyecto.dataValues.id_proyecto;
+    worksheet.getCell('A2').value = nameJuntaVecinalFormmated;
+
     worksheet.getCell('B1').value = 'Nombre Proyecto';
     worksheet.getCell('B1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('B2').value = proyecto.dataValues.nombre;
+    worksheet.getCell('B2').value = proyecto[0].dataValues.nombre;
+    
     worksheet.getCell('C1').value = 'Descripción';
     worksheet.getCell('C1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('C2').value = proyecto.dataValues.descripcion;
+    worksheet.getCell('C2').value = proyecto[0].dataValues.descripcion;
+
     worksheet.getCell('D1').value = 'Cupo Mínimo';
     worksheet.getCell('D1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('D2').value = proyecto.dataValues.cupo_min;
+    worksheet.getCell('D2').value = proyecto[0].dataValues.cupo_min;
+    worksheet.getCell(`D2`).style = {
+      alignment: {
+        horizontal: 'center'
+      }
+    };
+
     worksheet.getCell('E1').value = 'Cupo Máximo';
     worksheet.getCell('E1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('E2').value = proyecto.dataValues.cupo_max;
-    worksheet.getCell('F1').value = 'Inscritos';
+    worksheet.getCell('E2').value = proyecto[0].dataValues.cupo_max;
+    worksheet.getCell(`E2`).style = {
+      alignment: {
+        horizontal: 'center'
+      }
+    };
+
+    worksheet.getCell('F1').value = 'Total Inscritos';
     worksheet.getCell('F1').style = {
       font: {
         bold: true
       }
     };
     worksheet.getCell('F2').value = count;
+    worksheet.getCell(`F2`).style = {
+      alignment: {
+        horizontal: 'center'
+      }
+    };
+    
     worksheet.getCell('G1').value = 'Estado';
     worksheet.getCell('G1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('G2').value = proyecto.dataValues.estado;
+    worksheet.getCell('G2').value = proyecto[0].dataValues.estado;
+
     worksheet.getCell('H1').value = 'Fecha Proyecto';
     worksheet.getCell('H1').style = {
       font: {
         bold: true
       }
     };
-    worksheet.getCell('H2').value = proyecto.dataValues.fecha_proyecto;
+    worksheet.getCell('H2').value = proyecto[0].dataValues.fecha_proyecto;
+    //data neighbor.
+    if (proyectoEnReportes) {
+      const vecinosStartRow = 5;
+  
+      // Encabezados
+      worksheet.getCell(`A${vecinosStartRow}`).value = 'Rut Vecino';
+      worksheet.getCell(`A${vecinosStartRow}`).style = {
+        font: {
+          bold: true
+        }
+      };
+      worksheet.getCell(`B${vecinosStartRow}`).value = 'Nombre Vecino';
+      worksheet.getCell(`B${vecinosStartRow}`).style = {
+        font: {
+          bold: true
+        }
+      };
+      worksheet.getCell(`C${vecinosStartRow}`).value = 'Dirección';
+      worksheet.getCell(`C${vecinosStartRow}`).style = {
+        font: {
+          bold: true
+        }
+      };
+      worksheet.getCell(`D${vecinosStartRow}`).value = 'Correo Electrónico';
+      worksheet.getCell(`D${vecinosStartRow}`).style = {
+        font: {
+          bold: true
+        }
+      };
+      worksheet.getCell(`E${vecinosStartRow}`).value = 'Teléfono';
+      worksheet.getCell(`E${vecinosStartRow}`).style = {
+        font: {
+          bold: true
+        }
+      };
+      worksheet.getCell(`F${vecinosStartRow}`).value = 'Vecino Inscrito';
+      worksheet.getCell(`F${vecinosStartRow}`).style = {
+        font: {
+          bold: true
+        }
+      };
+      
+      // Datos de los vecinos
+      const vecinos = proyecto[0].dataValues.JuntaVecinal.Vecinos;
+      vecinos.forEach((vecino: any, index: any) => {
+        const row = vecinosStartRow + index + 1; // Sumar 1 para evitar sobrescribir los encabezados
+        const fullNameNeighbor = covertFirstCapitalLetterWithSpace(vecino.primer_nombre + ' ' + vecino.segundo_nombre + ' ' + vecino.primer_apellido + ' ' + vecino.segundo_apellido);
+        const addressNeighbor = covertFirstCapitalLetterWithSpace(vecino.direccion);
+
+        worksheet.getCell(`A${row}`).value = vecino.rut_vecino;
+        worksheet.getCell(`B${row}`).value = fullNameNeighbor;
+        worksheet.getCell(`C${row}`).value = addressNeighbor;
+        worksheet.getCell(`D${row}`).value = vecino.correo_electronico;
+        worksheet.getCell(`E${row}`).value = vecino.telefono;
+        worksheet.getCell(`F${row}`).value = proyectoEnReportes.dataValues.inscrito;
+        worksheet.getCell(`F${row}`).style = {
+          alignment: {
+            horizontal: 'center'
+          }
+        };
+      });
+      
+    }
+
     worksheet.columns.forEach((column) => {
-      column.width = 20;
+      column.width = 28;
     });
     //configura el encabezado de la respuesta para indicar que es un archivo Excel.
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -260,7 +372,7 @@ class ProyectoController {
         console.error('Error al generar el archivo Excel:', error);
         res.status(500).json({ error: 'Error al generar el archivo Excel' });
       });
-  }
+  };
 
   getFiltersForModify = async (req: Request, res: Response) => {
     try {
@@ -279,7 +391,8 @@ class ProyectoController {
       return res.status(500).json({ resp: "Error al obtener los filtros para modificar el proyecto", error: '0' });
     }
   };
-};  
+
+}    
 const proyectoController = new ProyectoController();
 
 export default proyectoController;
