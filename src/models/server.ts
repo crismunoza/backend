@@ -12,6 +12,8 @@ import routaproyecto from "../routes/proyecto"
 import routasolicitud from "../routes/solicitud"
 import routacontac from "../routes/vercontacto"  
 import routareporte from "../routes/reporte"   
+import routapublicaciones from "../routes/publicacion";   
+
 
 import rutavaloraciones from "../routes/valoraciones"
 
@@ -54,6 +56,7 @@ export class Server {
         this.app.use('/api/valoraciones', rutavaloraciones);
         this.app.use('/api/reporte', routareporte);
         this.app.use('/api/vercontacto', routacontac);
+        this.app.use('/api/publicacion', routapublicaciones);
         this.app.use(express.static('public'));
     }
     middlewares() {

@@ -71,3 +71,7 @@ export const removeAccents = (letter: string) => {
 
   return letter;
 };
+
+export const convertToLowerCase = (words: string) => {
+  return words.toLowerCase();
+}  
