@@ -231,6 +231,29 @@ export const UpdateClave = async (req:Request, res:Response)=>{
   }
 };
 
-
-
+export const deleteUser = async (req: Request, res: Response) => {
+  const { id, id_junta } = req.body;
+  try {
+    const userCount: number = await RepresentanteVecinal.count({
+      where: { fk_id_junta_vecinal: id_junta }
+    });
+    console.log('userCount', userCount);
+    if (userCount >= 2) {
+      await RepresentanteVecinal.destroy({
+        where: { id_representante_vecinal: id }
+      });
+      return res.json({
+        status: 200,
+        respuesta: 'Usuario Eliminado con éxito'
+      });
+    } else {
+      return res.json({
+        status: 404,
+        respuesta: 'No se puede eliminar'
+      });
+    }
+  } catch (error) {
+    return res.json({ status: error });
+  }
+};
 
