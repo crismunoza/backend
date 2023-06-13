@@ -1,6 +1,5 @@
 import { Router } from 'express';
-
-import { inserRep, insertJuntaVecinal, getJuntaVecinal, cantRep }from '../controllers/juntaVecinal';
+import { inserRep, insertJuntaVecinal, getJuntaVecinal, cantRep } from '../controllers/juntaVecinal';
 
 const router = Router();
 

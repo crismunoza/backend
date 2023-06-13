@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {cambiarContrasena } from "../controllers/resetpass";
+import { cambiarContrasena } from "../controllers/resetpass";
 //creacion de la ruta para los usuarios
 const router = Router();
 //ruta para crear un nuevo usuario y para el login

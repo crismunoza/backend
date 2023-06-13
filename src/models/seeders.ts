@@ -1,19 +1,18 @@
 import { Comuna } from "./mer";
 
+export class Seeders {
 
-export class Seeders{
+  //**datos a insertar */
+  dataComuna = [
+    { nombre: 'Puente Alto' },
+    { nombre: 'La Florida' },
+    { nombre: 'Maipu' },
+    { nombre: 'San Ramon' },
+    { nombre: 'Macul' },
+  ];
 
-    //**datos a insertar */
-    dataComuna = [
-        { nombre: 'Puente Alto' },
-        { nombre: 'La Florida' },
-        { nombre: 'Maipu' },
-        { nombre: 'San Ramon' },
-        { nombre: 'Macul' },
-    ];
-
-    //**promise que inserta los datos de inicio en las tablas comunas y municipalidad. */
-    insertSeeders = async () => {
+  //**promise que inserta los datos de inicio en las tablas comunas y municipalidad. */
+  insertSeeders = async () => {
     try {
       // Verificar si la tabla Comuna contiene datos.
       const comunaCount = await Comuna.count();

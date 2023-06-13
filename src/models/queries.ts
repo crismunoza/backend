@@ -1,20 +1,20 @@
 import { QueryTypes } from "sequelize";
 import db from "../db/connection";
 export const queries = {
-    //**query que comprueba la existencia de tablas en el esquema. */
-    existsTables: `SELECT table_name FROM all_tables WHERE owner = 'C##JUNTA_VECINAL';`,
+  //**query que comprueba la existencia de tablas en el esquema. */
+  existsTables: `SELECT table_name FROM all_tables WHERE owner = 'C##JUNTA_VECINAL';`,
 }
 export const getMaxId = async (modelName: string, idField: string): Promise<number> => {
-    try {
-      const Model = db.models[modelName];
-      const result = await Model.max(idField);
-      const maxId: number = Number(result) || 0;
-      return maxId + 1;
-    } catch (error) {
-      console.error(`Error al obtener el máximo id de ${modelName}:`, error);
-      throw error;
-    }
-  };
+  try {
+    const Model = db.models[modelName];
+    const result = await Model.max(idField);
+    const maxId: number = Number(result) || 0;
+    return maxId + 1;
+  } catch (error) {
+    console.error(`Error al obtener el máximo id de ${modelName}:`, error);
+    throw error;
+  }
+};
 
 export const storageProcedure = async (
   id_actividad: number,
@@ -37,18 +37,15 @@ export const storageProcedure = async (
         tipo_proceso: tipo_proceso
       }
     });
-
     if (tipo_proceso === 0) {
       return 'Se ha insertado con éxito la información de la publicación';
     } else {
       return 'Se ha modificado con éxito la información de la publicación';
     }
-    
   } catch (error) {
     console.error('Error al insertar el procedimiento almacenado', error);
     throw error;
   }
-
 }
 
 export const getPublication = async (id_junta_vecinal: number) => {
@@ -68,8 +65,8 @@ export const getPublication = async (id_junta_vecinal: number) => {
       WHERE jv."id_junta_vecinal" = :id_junta_vecinal`;
 
     const obtenerPublicaciones = await db.query(query, {
-        replacements: { id_junta_vecinal },
-        type: QueryTypes.SELECT,
+      replacements: { id_junta_vecinal },
+      type: QueryTypes.SELECT,
     });
 
     return obtenerPublicaciones;
@@ -77,7 +74,6 @@ export const getPublication = async (id_junta_vecinal: number) => {
     console.error('Error al obtener las publicaciones', error);
     throw error;
   }
-  
 };
 
 export const getProyects = async (id_junta_vecinal: number) => {
@@ -100,8 +96,8 @@ export const getProyects = async (id_junta_vecinal: number) => {
       ORDER BY "id_proyecto" ASC; `;
 
     const obtenerProyectos = await db.query(query, {
-        replacements: { id_junta_vecinal },
-        type: QueryTypes.SELECT,
+      replacements: { id_junta_vecinal },
+      type: QueryTypes.SELECT,
     });
 
     return obtenerProyectos;
@@ -109,6 +105,5 @@ export const getProyects = async (id_junta_vecinal: number) => {
     console.error('Error al al obtener los proyectos', error);
     throw error;
   }
-  
+
 };
-  

@@ -18,77 +18,77 @@ class ProyectoController {
     this.modelName = SQLTableNameValues.proyecto;
     this.estatApply = SQLTableProyect.estado;
   }
-  
+
   insertProyect = async (req: Request, res: Response) => {
     try {
-        let fk_id_junta_vecinal;
-        const { nombreProyecto, cupoMinimo, cupoMaximo, descripcion, fecha, imagen, rut_user, image } = req.body;
-        //se asigna el valor activo al estado, ya que se está insertando el proyecto.
-        const estado = this.estatApply; 
-        //obtención max id a ingresar.
-        const maxId = await getMaxId(this.modelName,'id_proyecto');
-        //se formatea la fecha.
-        const formattedDate = formatDate(req.body.fecha);
-        //eliminación de espacios en la ruta de la imagen.
-        const formattedImagen = deleteSpace(imagen);
-        const formattedNombreProyecto = parserUpperWord(nombreProyecto);
-        const formattedDescripcion = parserUpperWord(descripcion);
-        //obtención de fk_id_junta_vecinal por el rut del representante.
-        const representante_fk_id_junta_vecinal = await RepresentanteVecinal.findOne({
-          where: { rut_representante: rut_user },
-          attributes: ['fk_id_junta_vecinal']
-        });
-        if(representante_fk_id_junta_vecinal){
-          fk_id_junta_vecinal = representante_fk_id_junta_vecinal.dataValues['fk_id_junta_vecinal']
-        }
-        //**guardado de imagen */
-        const imageBuffer = decodeBase64Image(image);
-        const nombreImagen = deleteSpace(nombreProyecto);
-        const nombreImagenFormmated = convertToLowerCase(nombreImagen);
-        const imageName = `${nombreImagenFormmated}.png`;
-        const imageFolder = path.join(__dirname, "../../public/images/proyectos");
-        const imagePath = path.join(imageFolder, imageName);
-        if (!fs.existsSync(imagePath)) {
-          if (!fs.existsSync(imageFolder)) {
-            fs.mkdirSync(imageFolder, { recursive: true });
-          }
-          fs.writeFileSync(imagePath, imageBuffer);
-        } else {
-          console.log('La imagen ya existe en la carpeta de proyectos');
-        }
-
-        const imageUrl = imageName;
-        //crea el objeto de datos del proyecto de tipo ProyectoType.
-        const proyectoData: ProyectoType = {
-          id_proyecto: maxId,
-          nombre: formattedNombreProyecto,
-          descripcion: formattedDescripcion,
-          cupo_min: cupoMinimo,
-          cupo_max: cupoMaximo,
-          estado,
-          ruta_imagen: imageUrl,
-          fecha_proyecto: formattedDate,
-          fk_id_junta_vecinal: fk_id_junta_vecinal
-        };
-        //inserción del proyecto.
-        const proyecto = await Proyecto.create(proyectoData);
-        //response.
-        return res.json({resp: "Proyecto insertado exitosamente"});
-      } catch (error) {
-        //control nombre mensaje error.
-        const errorMessage = (error as any)?.parent?.message || (error as any)?.message;
-        console.log(errorMessage);
-        if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_nombre_unique) violada") {
-          // return res.send("El nombre del proyecto ya existe");
-          return res.status(400).json({ resp: "El nombre del proyecto ya existe", error: '0' });
-        } else {
-          if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_descripcion_unique) violada"){
-            return res.status(400).json({ resp: "La descripción ya existe", error: '1' });
-          } else {
-            return res.status(400).json({ resp: "Error al insertar el proyecto", error: '-1' });
-          }
-        } 
+      let fk_id_junta_vecinal;
+      const { nombreProyecto, cupoMinimo, cupoMaximo, descripcion, fecha, imagen, rut_user, image } = req.body;
+      //se asigna el valor activo al estado, ya que se está insertando el proyecto.
+      const estado = this.estatApply;
+      //obtención max id a ingresar.
+      const maxId = await getMaxId(this.modelName, 'id_proyecto');
+      //se formatea la fecha.
+      const formattedDate = formatDate(req.body.fecha);
+      //eliminación de espacios en la ruta de la imagen.
+      const formattedImagen = deleteSpace(imagen);
+      const formattedNombreProyecto = parserUpperWord(nombreProyecto);
+      const formattedDescripcion = parserUpperWord(descripcion);
+      //obtención de fk_id_junta_vecinal por el rut del representante.
+      const representante_fk_id_junta_vecinal = await RepresentanteVecinal.findOne({
+        where: { rut_representante: rut_user },
+        attributes: ['fk_id_junta_vecinal']
+      });
+      if (representante_fk_id_junta_vecinal) {
+        fk_id_junta_vecinal = representante_fk_id_junta_vecinal.dataValues['fk_id_junta_vecinal']
       }
+      //**guardado de imagen */
+      const imageBuffer = decodeBase64Image(image);
+      const nombreImagen = deleteSpace(nombreProyecto);
+      const nombreImagenFormmated = convertToLowerCase(nombreImagen);
+      const imageName = `${nombreImagenFormmated}.png`;
+      const imageFolder = path.join(__dirname, "../../public/images/proyectos");
+      const imagePath = path.join(imageFolder, imageName);
+      if (!fs.existsSync(imagePath)) {
+        if (!fs.existsSync(imageFolder)) {
+          fs.mkdirSync(imageFolder, { recursive: true });
+        }
+        fs.writeFileSync(imagePath, imageBuffer);
+      } else {
+        console.log('La imagen ya existe en la carpeta de proyectos');
+      }
+
+      const imageUrl = imageName;
+      //crea el objeto de datos del proyecto de tipo ProyectoType.
+      const proyectoData: ProyectoType = {
+        id_proyecto: maxId,
+        nombre: formattedNombreProyecto,
+        descripcion: formattedDescripcion,
+        cupo_min: cupoMinimo,
+        cupo_max: cupoMaximo,
+        estado,
+        ruta_imagen: imageUrl,
+        fecha_proyecto: formattedDate,
+        fk_id_junta_vecinal: fk_id_junta_vecinal
+      };
+      //inserción del proyecto.
+      const proyecto = await Proyecto.create(proyectoData);
+      //response.
+      return res.json({ resp: "Proyecto insertado exitosamente" });
+    } catch (error) {
+      //control nombre mensaje error.
+      const errorMessage = (error as any)?.parent?.message || (error as any)?.message;
+      console.log(errorMessage);
+      if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_nombre_unique) violada") {
+        // return res.send("El nombre del proyecto ya existe");
+        return res.status(400).json({ resp: "El nombre del proyecto ya existe", error: '0' });
+      } else {
+        if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_descripcion_unique) violada") {
+          return res.status(400).json({ resp: "La descripción ya existe", error: '1' });
+        } else {
+          return res.status(400).json({ resp: "Error al insertar el proyecto", error: '-1' });
+        }
+      }
+    }
   }
 
   getProyects = async (req: Request, res: Response) => {
@@ -102,10 +102,10 @@ class ProyectoController {
   getProyectsWithFilters = async (req: Request, res: Response) => {
     try {
       let proyects;
-      const filtro = req.body; 
+      const filtro = req.body;
       if (filtro.estado.includes('TODOS')) {
         proyects = await Proyecto.findAll();
-        
+
       } else {
         proyects = await Proyecto.findAll({
           where: {
@@ -118,7 +118,7 @@ class ProyectoController {
       return res.status(500).json({ resp: "Error al obtener los proyectos", error: '0' });
     }
   };
-    
+
   getFilters = async (req: Request, res: Response) => {
     try {
       const estados = await Proyecto.findAll({
@@ -137,14 +137,14 @@ class ProyectoController {
       const { id_proyecto, nombre, cupo_min, cupo_max, descripcion, estado } = req.body;
       const convertEstatus = convertUpperCASE(req.body.estado);
 
-      if (convertEstatus !== 'ACTIVO' && convertEstatus !== 'CERRADO'){
+      if (convertEstatus !== 'ACTIVO' && convertEstatus !== 'CERRADO') {
         return res.status(400).json({ resp: 'El estado debe ser ACTIVO o CERRADO', error: '0' });
       }
-        await Proyecto.update(
-          { nombre, cupo_min, cupo_max, descripcion, estado: convertEstatus },
-          { where: { id_proyecto } }
-        );
-        return res.status(200).json({resp: 'Información modificada exitosamente'});
+      await Proyecto.update(
+        { nombre, cupo_min, cupo_max, descripcion, estado: convertEstatus },
+        { where: { id_proyecto } }
+      );
+      return res.status(200).json({ resp: 'Información modificada exitosamente' });
     } catch (error) {
       return res.status(500).json({ resp: "Error al modificar la información", error: '1' });
     }
@@ -153,9 +153,9 @@ class ProyectoController {
   deleteProyect = async (req: Request, res: Response) => {
     try {
       const id_proyecto = req.params.idProyecto;
-      
-      await Proyecto.destroy({where: {id_proyecto}});
-      return res.status(200).json({resp: 'Proyecto eliminado exitosamente'});
+
+      await Proyecto.destroy({ where: { id_proyecto } });
+      return res.status(200).json({ resp: 'Proyecto eliminado exitosamente' });
     } catch (error) {
       console.log(error)
       return res.status(500).json({ resp: "Error al eliminar el proyecto", error: '0' });
@@ -177,9 +177,9 @@ class ProyectoController {
 
   generateExcel = async (req: Request, res: Response) => {
     const { id_proyecto } = req.params;
-    
+
     const proyecto = await Proyecto.findAll({
-      where: {id_proyecto: id_proyecto},
+      where: { id_proyecto: id_proyecto },
       attributes: ['nombre', 'descripcion', 'cupo_min', 'cupo_max', 'estado', 'fecha_proyecto'],
       include: [
         {
@@ -196,16 +196,17 @@ class ProyectoController {
     });
     console.log(proyecto)
     const nameJuntaVecinalFormmated = covertFirstCapitalLetterWithSpace(proyecto[0].dataValues.JuntaVecinal.razon_social);
-    
+
     if (!proyecto) {
       return res.status(404).json({ error: 'Proyecto no encontrado' });
     }
     const count = await Reporte.count({
-      where:{
-      fk_id_proyecto: id_proyecto,
-      inscrito: 'SI'}
+      where: {
+        fk_id_proyecto: id_proyecto,
+        inscrito: 'SI'
+      }
     });
-    
+
     const proyectoEnReportes = await Reporte.findOne({
       where: {
         fk_id_proyecto: id_proyecto
@@ -215,7 +216,7 @@ class ProyectoController {
 
     const nameExcel = deleteSpace(proyecto[0].dataValues.nombre);
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet(`proyecto-${nameExcel}`);    
+    const worksheet = workbook.addWorksheet(`proyecto-${nameExcel}`);
     //se agregan los datos del proyecto a las celdas
     worksheet.getCell('A1').value = 'Junta Vecinal';
     worksheet.getCell('A1').style = {
@@ -232,7 +233,7 @@ class ProyectoController {
       }
     };
     worksheet.getCell('B2').value = proyecto[0].dataValues.nombre;
-    
+
     worksheet.getCell('C1').value = 'Descripción';
     worksheet.getCell('C1').style = {
       font: {
@@ -279,7 +280,7 @@ class ProyectoController {
         horizontal: 'center'
       }
     };
-    
+
     worksheet.getCell('G1').value = 'Estado';
     worksheet.getCell('G1').style = {
       font: {
@@ -298,7 +299,7 @@ class ProyectoController {
     //data neighbor.
     if (proyectoEnReportes) {
       const vecinosStartRow = 5;
-  
+
       // Encabezados
       worksheet.getCell(`A${vecinosStartRow}`).value = 'Rut Vecino';
       worksheet.getCell(`A${vecinosStartRow}`).style = {
@@ -336,7 +337,7 @@ class ProyectoController {
           bold: true
         }
       };
-      
+
       // Datos de los vecinos
       const vecinos = proyecto[0].dataValues.JuntaVecinal.Vecinos;
       vecinos.forEach((vecino: any, index: any) => {
@@ -356,7 +357,7 @@ class ProyectoController {
           }
         };
       });
-      
+
     }
 
     worksheet.columns.forEach((column) => {
@@ -380,19 +381,19 @@ class ProyectoController {
         attributes: ['estado'],
         group: ['estado']
       })).map((estado: any) => estado.estado);
-  
+
       const requiredEstados = ['ACTIVO', 'CERRADO'];
       const missingEstados = requiredEstados.filter(estado => !existingEstados.includes(estado));
-      
+
       const estadosToSend = [...existingEstados, ...missingEstados];
-        
+
       return res.status(200).json(estadosToSend);
     } catch (error) {
       return res.status(500).json({ resp: "Error al obtener los filtros para modificar el proyecto", error: '0' });
     }
   };
 
-}    
+}
 const proyectoController = new ProyectoController();
 
 export default proyectoController;

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import  {Solicitud,Vecino}  from "../models/mer";
+import { Solicitud, Vecino } from "../models/mer";
 import { Sequelize, QueryTypes } from "sequelize";
 import db from "../db/connection";
 
@@ -20,10 +20,10 @@ export const newsolicitud = async (req: Request, res: Response) => {
             })
         }
     } catch (e) {
-        console.log("error del backend",e);
+        console.log("error del backend", e);
         res.status(500).json({
             message: 'Error al crear solicitud',
-            
+
         })
     }
 };
@@ -38,10 +38,9 @@ export const getsolicitudes = async (req: Request, res: Response) => {
     }
 }
 
-
 export const versolicitudes = async (req: Request, res: Response) => {
     try {
-      const query = `
+        const query = `
       SELECT
       "solicitud"."id_solicitud",
       "solicitud"."titulo_solicitud",
@@ -57,47 +56,25 @@ export const versolicitudes = async (req: Request, res: Response) => {
        FROM "solicitud"
        INNER JOIN "vecino" ON "solicitud"."fk_id_vecino" = "vecino"."id_vecino";
       `;
-  
-      const listsolicitud = await db.query(query, {
-        type: QueryTypes.SELECT,
-      });
-  
-      console.log("listsolicitud", listsolicitud);
-      console.log(JSON.stringify(listsolicitud));
-  
-      res.json({
-        data: listsolicitud,
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  };
 
-//   export const versolicitudes = async (req: Request, res: Response) => {
-//     try {
-//       const listsolicitud = await Solicitud.findAll({
-//         include: {
-//           model: Vecino,
-//           attributes: ['primer_nombre', 'primer_apellido','fk_id_junta_vecinal'],
-//         },
-//       });
-  
-//       console.log("listsolicitud", listsolicitud);
-//       console.log(JSON.stringify(listsolicitud));
-  
-//       res.json({
-//         data: listsolicitud,
-//       });
-//     } catch (e) {
-//       console.log(e);
-//       res.status(500).json({ error: 'Ocurrió un error en el servidor' });
-//     }
-//   };
-  
+        const listsolicitud = await db.query(query, {
+            type: QueryTypes.SELECT,
+        });
+
+        console.log("listsolicitud", listsolicitud);
+        console.log(JSON.stringify(listsolicitud));
+
+        res.json({
+            data: listsolicitud,
+        });
+    } catch (e) {
+        console.log(e);
+    }
+};
 
 export const updateSolicitud = async (req: Request, res: Response) => {
     const { id_solicitud } = req.params;
-    const {  respuesta, estado_solicitud } = req.body;
+    const { respuesta, estado_solicitud } = req.body;
     try {
         const solicitud = await Solicitud.update({
             estado_solicitud,
