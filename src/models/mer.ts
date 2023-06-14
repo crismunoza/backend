@@ -358,7 +358,7 @@ export const Certificado = sequelize.define('Certificado', {
         primaryKey: true,
         autoIncrement: true
     },
-    descripcion: {
+    tipo_certificado: {
         type: DataTypes.STRING,
         allowNull: true,
     },

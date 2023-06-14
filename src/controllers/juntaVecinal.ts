@@ -121,6 +121,78 @@ export const inserRep = async (req: Request, res: Response) => {
     }
 };
 
+
+// insert del segundo representante vecinal
+export const inserRep2 = async (req: Request, res: Response) => {
+
+    const datoRep = req.body;
+    try {
+        const RepExistente = await RepresentanteVecinal.findOne({ where: { rut_representante: datoRep.rut_representante },attributes: ['rut_representante'] });
+        if (RepExistente !== null) {
+            console.log('entra a q existe rep ')
+            JuntaVecinal.destroy({ where: { id_junta_vecinal: datoRep.id_junta_vecinal } });
+            return res.json({
+                msg: `El represenatante ya se encuentra en el sistema, no se realiza la creación de la junta vecinal`
+            })
+        }
+        else {
+            const idcomuna = await JuntaVecinal.findOne({
+                where: { id_junta_vecinal: datoRep.id_junta_vecinal },
+                attributes: ['fk_id_comuna']
+              });
+            const idcomuna2 = idcomuna?.getDataValue('fk_id_comuna');           
+            //agregamos enseguida el 1er rep con los datos de la creacion anterior 
+            //encryptamos la contraseña para q quede almacenada en la bda
+            const passhash = await bcrypt.hash(datoRep.contrasenia, 10);
+            //ahora decodificaremos la img 
+            const imageBuffer = decodeBase64Image(datoRep.ruta_firma);
+            console.log("ruta_evidencia:", imageBuffer);
+
+            // Genera un nombre de archivo único para la imagen
+            const imageName = `firma-${datoRep.rut_representante}.jpg`;
+
+            // Ruta de la carpeta donde se guardarán las imágenes
+            const imageFolder = path.join(__dirname, "../../src/utils/evidencia_firma_rep");
+
+            // Ruta completa de la imagen
+            const imagePath = path.join(imageFolder, imageName);
+            // Crea la carpeta si no existe
+            if (!fs.existsSync(imageFolder)) {
+                fs.mkdirSync(imageFolder, { recursive: true });
+            }
+            // Guarda la imagen en el sistema de archivos
+            fs.writeFileSync(imagePath, imageBuffer);
+
+            // Obtiene la URL de la imagen guardada
+            const imageUrl = `src/utils/evidencia_firma_rep/${imageName}`;
+
+            const RepVec = await RepresentanteVecinal.create({
+                rut_representante: datoRep.rut_representante,
+                primer_nombre: datoRep.primer_nombre,
+                segundo_nombre: datoRep.segundo_nombre,
+                primer_apellido: datoRep.primer_apellido,
+                segundo_apellido: datoRep.segundo_apellido,
+                comuna_rep: idcomuna2,
+                direccion: datoRep.direccion_rep,
+                numero: datoRep.numero_rep,
+                correo_electronico: datoRep.correo_electronico,
+                telefono: datoRep.telefono,
+                contrasenia: passhash,
+                avatar: datoRep.avatar,
+                ruta_evidencia: datoRep.ruta_evidencia,
+                ruta_firma: imageUrl,
+                fk_id_junta_vecinal: datoRep.id_junta_vecinal
+            },
+            );
+            console.log('ESTO ES LO QUE GUARDA EL REP2', RepVec)
+            return res.json({ msg: 'yes' });
+        }
+    }
+    catch (error) {
+        console.log('hay un error')
+    }
+};
+
 export const cantRep = async (req: Request, res: Response) => {
     const id = req.params.id_junta;
     try {

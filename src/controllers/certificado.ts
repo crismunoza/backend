@@ -245,7 +245,7 @@ export const getCertify = async (req: Request, res: Response) => {
 
     const certificado = await Certificado.create({
       id_certificado: maxId,
-      descripcion: subtitleFormatted,
+      tipo_certificado: subtitleFormatted,
       fk_id_vecino: id_neighbor.id_key
     });
 
