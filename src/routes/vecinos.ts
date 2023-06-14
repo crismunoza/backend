@@ -1,6 +1,5 @@
 import { Router } from "express";
-import {insertvecino, getvecinos, deletevecino, updatevecino, listarADD, noacepptado,modificarEstado} from "../controllers/vecinos";
-
+import { insertvecino, getvecinos, deletevecino, updatevecino, listarADD, noacepptado, modificarEstado, verificarsiexiste } from "../controllers/vecinos";
 
 const router = Router();
 
@@ -14,4 +13,6 @@ router.put('/updatevecino/:rut_vecino', updatevecino);
 router.get('/listarADD', listarADD);
 router.delete('/noacepptado/:rut_vecino', noacepptado);
 router.post('/modificarEstado', modificarEstado);
+//ruta de verificacion de si existe el vecino
+router.get('/verificarsiexiste/:rut', verificarsiexiste);
 export default router;

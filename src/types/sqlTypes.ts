@@ -5,9 +5,12 @@ export enum SQLTableNameValues {
   certificado = "Certificado",
   solicitud = "Solicitud",
   valoracion = "Valoracion",
-  representante_vecinal =  "RepresentanteVecinal",
+  representante_vecinal = "RepresentanteVecinal",
   vecino = "Vecino",
   junta_vecinal = "JuntaVecinal",
   municipalidad = "Municipalidad",
   comuna = "Comuna"
 }
+export enum SQLTableProyect {
+  estado = 'ACTIVO',
+};

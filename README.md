@@ -2,7 +2,17 @@
 npm install qrcode --save
 npm install pdfkit --save
 npm install concurrently --save-dev
-
+npm install nodemailer
+npm install exceljs
+npm install bcrypt
+npm install cors
+npm install dotenv
+nom install jsonwebtoken
+npm install sequelize
+npm install oracledb
+npm install express        
+npm install typescript --save-dev
+npm i nodemon --save-dev
 ---------importante-----------
 Para ejecutar la aplicación en su totalidad agregar este script en el archivo package.json:
 
