@@ -176,6 +176,21 @@ export const getvecinos = async (req: Request, res: Response) => {
 export const deletevecino = async (req: Request, res: Response) => {
   // Obtiene el valor del parámetro rut_vecino de la solicitud
   const { rut_vecino } = req.params;
+  const mailVecino: any = await Vecino.findOne({ where: { rut_vecino: rut_vecino } });
+  const mailOptions = {
+    from: 'juntaaunclick@gmail.com',
+    to: mailVecino.correo_electronico,
+    subject: 'Junta a un Click',
+    html: "<body><h1>¡Lo sentimos!</h1><p>Un representante le ha rechazado o eliminado el ingreso a la junta vecinal a la que te registraste.</p><img src='https://previews.123rf.com/images/arcady31/arcady311210/arcady31121000067/15714154-lo-sentimos-ilustraci%C3%B3n-smiley.jpg' width='300px' height='200px'></body>",
+  };
+  //envio correo de rechazo del vecino a su direccion de correo antes de eliminarlo
+  transporter.sendMail(mailOptions, (error: any, info: { response: string; }) => {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log('Correo electrónico enviado: ' + info.response);
+    }
+  });  
   // Elimina el vecino de la base de datos
   const deleteRowCount = await Vecino.destroy({
     where: {
@@ -224,6 +239,7 @@ export const listarADD = async (req: Request, res: Response) => {
 export const noacepptado = async (req: Request, res: Response) => {
   // Obtiene el valor del parámetro rut_vecino de la solicitud
   const { rut_vecino } = req.params;
+
   // Elimina el vecino de la base de datos
   const deleteRowCount = await Vecino.destroy({
     where: {
@@ -255,7 +271,7 @@ export const modificarEstado = async (req: Request, res: Response) => {
       from: 'juntaaunclick@gmail.com',
       to: mailVecino.correo_electronico,
       subject: 'Bienvenid@ a Junta a un Click',
-      html: "<body><h1>¡Bienvenid@!</h1><p>Un representante te ha otorgado acceso a la junta vecinal a la que te registraste.</p><p style='color: rgb(199, 0, 57);'><h3>**RECUERDA QUE DEBES INGRESAR CON TU RUT y LA CLAVE QUE REGISTRASTE</h3></p><img src='https://www.shutterstock.com/image-vector/welcome-poster-spectrum-brush-strokes-260nw-1146069941.jpg' width='400px' height='200px'><p>Ahora puedes acceder a nuestro sitio, sigue el siguiente enlace <a href='http://localhost:4200/login'>ir al sitio</a></p></body>",
+      html: "<style>.text-red {color: rgb(199, 0, 57);} </style><body><h1>¡Bienvenid@!</h1><p>Un representante te ha otorgado acceso a la junta vecinal a la que te registraste.</p><p><h3 class='text-red'>**RECUERDA QUE DEBES INGRESAR CON TU RUT y LA CLAVE QUE REGISTRASTE</h3></p><img src='https://www.shutterstock.com/image-vector/welcome-poster-spectrum-brush-strokes-260nw-1146069941.jpg' width='400px' height='200px'><p>Ahora puedes acceder a nuestro sitio, sigue el siguiente enlace <a href='http://localhost:4200/login'>ir al sitio</a></p></body>",
     };
 
     //Buscar el vecino por el rut y modificar el estado
