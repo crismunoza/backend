@@ -1,9 +1,7 @@
 import { Router } from "express";
-import {insertvecino, getvecinos, deletevecino, updatevecino, listarADD, noacepptado,modificarEstado, verificarsiexiste} from "../controllers/vecinos";
-
+import { insertvecino, getvecinos, deletevecino, updatevecino, listarADD, noacepptado, modificarEstado, verificarsiexiste } from "../controllers/vecinos";
 
 const router = Router();
-
 
 //ruta del modulo del registro de vecinos
 router.post('/', insertvecino);

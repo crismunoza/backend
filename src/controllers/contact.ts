@@ -2,11 +2,10 @@ import { Request, Response } from 'express';
 import { QueryTypes } from 'sequelize';
 import db from '../db/connection';
 
-
 export const vercontacto = async (req: Request, res: Response) => {
-    const { id_junta_vecinal } = req.params;
-    try {
-      const query = `
+  const { id_junta_vecinal } = req.params;
+  try {
+    const query = `
       SELECT 
         "comuna"."nombre",
         "junta_vecinal"."direccion",
@@ -29,11 +28,11 @@ export const vercontacto = async (req: Request, res: Response) => {
       replacements: { id_junta_vecinal },
       type: QueryTypes.SELECT,
     });
-      
-      res.json({
-        data: vercontacto,
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  };
+
+    res.json({
+      data: vercontacto,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};

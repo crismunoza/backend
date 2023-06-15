@@ -1,14 +1,11 @@
-import { 
+import {
     Comuna, JuntaVecinal, Proyecto, Reporte, RepresentanteVecinal, Actividad, Vecino, Certificado, Valoracion, Solicitud
- } from "./mer"
-
-export class Foreign{
-
+} from "./mer";
+export class Foreign {
     public async uniones(): Promise<string> {
-        
         try {
             //**relation between comuna and municipalidad */
-           // await Comuna.hasMany(Municipalidad, { foreignKey: 'fk_id_comuna' });
+            // await Comuna.hasMany(Municipalidad, { foreignKey: 'fk_id_comuna' });
             //await Municipalidad.belongsTo(Comuna, { foreignKey: 'fk_id_comuna' });
             //**relation between municipalidad and junta_vecinal */
             await Comuna.hasMany(JuntaVecinal, { foreignKey: 'fk_id_comuna' });
@@ -37,7 +34,6 @@ export class Foreign{
             //**relation between vecino and solicitud*/
             await Vecino.hasMany(Solicitud, { foreignKey: 'fk_id_vecino' });
             await Solicitud.belongsTo(Vecino, { foreignKey: 'fk_id_vecino' });
-
             return "Tablas relacionadas correctamente."
         } catch (error) {
             throw new Error(`Error al relacionar las tablas: ${error}`);

@@ -1,6 +1,5 @@
 import { Router } from "express";
-import { newsolicitud,getsolicitudes, versolicitudes,updateSolicitud } from "../controllers/solicitud";
-
+import { newsolicitud, getsolicitudes, versolicitudes, updateSolicitud } from "../controllers/solicitud";
 
 const router = Router();
 

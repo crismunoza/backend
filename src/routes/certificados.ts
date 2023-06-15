@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { getCertify, updateSubtitle, getParagraph, getDataNeighbor, sendEmail } from '../controllers/certificado';
-import validatetoken from "./validate-token";
+import { getCertify, updateSubtitle, getParagraph, getDataNeighbor, Enviocerti } from '../controllers/certificado';
 
 const router = Router();
 /**
@@ -10,7 +9,6 @@ router.get('/generate-pdf', getCertify);
 router.get('/obtener-parrafo', getParagraph);
 router.post('/update-subtitle', updateSubtitle);
 router.post('/obtener-rut', getDataNeighbor);
-router.post('/enviar-correo', sendEmail);
-
+router.post('/enviar-correo', Enviocerti);
 
 export default router;
