@@ -206,3 +206,83 @@ export const cantRep = async (req: Request, res: Response) => {
         return res.json({ status: 404, respuesta: error });
     }
 };   
+
+
+export const getRep = async (req: Request, res: Response) => {
+    const id = req.params.idJuntaVec;
+    console.log('id de la junta vecinal', id)
+  try {
+    // Obtiene todos los vecinos de la base de datos con evidencia igual a true (1)
+    const listRepresentantes = await RepresentanteVecinal.findAll({
+      where: {
+        fk_id_junta_vecinal: id
+      },
+    });
+    return res.json({ listRepresentantes });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      msg: 'Error al obtener los Representantes Vecinales'
+    });
+  }
+}
+
+export const updatereprese = async (req: Request, res: Response) => {
+  // Obtiene el valor del parámetro rut_vecino de la solicitud
+  const { rut_representante } = req.params;
+
+  // Obtiene los datos del cuerpo de la solicitud
+  const {
+    primer_nombre,
+    segundo_nombre,
+    primer_apellido,
+    segundo_apellido,
+    direccion,
+    numero,
+    correo_electronico,
+    telefono,
+    contrasenia
+  } = req.body;
+
+  let hashpasword: string;
+  // Busca el vecino en la base de datos
+  const repre: any = await RepresentanteVecinal.findOne({ where: { rut_representante: rut_representante } });
+
+  if (contrasenia === repre.contrasenia) {
+    // La contraseña ya está encriptada, utiliza la misma contraseña encriptada
+    hashpasword = repre.contrasenia;
+  } else {
+    // La contraseña no está encriptada, encripta la contraseña
+    hashpasword = await bcrypt.hash(contrasenia, 10);
+
+  }
+  // Actualiza los datos del vecino en la base de datos
+  const result = await RepresentanteVecinal.update(
+    {
+      primer_nombre,
+      segundo_nombre,
+      primer_apellido,
+      segundo_apellido,
+      direccion,
+      numero,
+      correo_electronico,
+      telefono,
+      contrasenia: hashpasword
+    },
+    {
+      where: {
+        rut_representante
+      }
+    }
+  );
+
+  if (result[0] > 0) {
+    return res.json({
+      msg: 'representante actualizado correctamente'
+    });
+  }
+
+  return res.json({
+    msg: 'No se encontró el representate a actualizar'
+  });
+}
