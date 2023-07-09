@@ -250,3 +250,28 @@ export const deleteUser = async (req: Request, res: Response) => {
   }
 };
 
+export const deletereprese = async (req: Request, res: Response) => {
+  const { rut_representante, idJuntaVec } = req.body;
+  try {
+    const userCount: number = await RepresentanteVecinal.count({
+      where: { fk_id_junta_vecinal: idJuntaVec }
+    });
+    console.log('userCount', userCount);
+    if (userCount >= 2) {
+      await RepresentanteVecinal.destroy({
+        where: { rut_representante}
+      });
+      return res.json({
+        status: 200,
+        respuesta: 'Usuario Eliminado con éxito'
+      });
+    } else {
+      return res.json({
+        status: 404,
+        respuesta: 'No se puede eliminar'
+      });
+    }
+  } catch (error) {
+    return res.json({ status: error });
+  }
+};
