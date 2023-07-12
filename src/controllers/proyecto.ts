@@ -20,76 +20,79 @@ class ProyectoController {
   }
 
   insertProyect = async (req: Request, res: Response) => {
-    try {
-      let fk_id_junta_vecinal;
-      const { nombreProyecto, cupoMinimo, cupoMaximo, descripcion, fecha, imagen, rut_user, image } = req.body;
-      //se asigna el valor activo al estado, ya que se está insertando el proyecto.
-      const estado = this.estatApply;
-      //obtención max id a ingresar.
-      const maxId = await getMaxId(this.modelName, 'id_proyecto');
-      //se formatea la fecha.
-      const formattedDate = formatDate(req.body.fecha);
-      //eliminación de espacios en la ruta de la imagen.
-      const formattedImagen = deleteSpace(imagen);
-      const formattedNombreProyecto = parserUpperWord(nombreProyecto);
-      const formattedDescripcion = parserUpperWord(descripcion);
-      //obtención de fk_id_junta_vecinal por el rut del representante.
-      const representante_fk_id_junta_vecinal = await RepresentanteVecinal.findOne({
-        where: { rut_representante: rut_user },
-        attributes: ['fk_id_junta_vecinal']
-      });
-      if (representante_fk_id_junta_vecinal) {
-        fk_id_junta_vecinal = representante_fk_id_junta_vecinal.dataValues['fk_id_junta_vecinal']
+  try {
+    let fk_id_junta_vecinal;
+    const { nombreProyecto, cupoMinimo, cupoMaximo, descripcion, imagen, rut_user, image } = req.body;
+    // Se asigna el valor activo al estado, ya que se está insertando el proyecto.
+    const estado = this.estatApply;
+    // Obtención max id a ingresar.
+    const maxId = await getMaxId(this.modelName, 'id_proyecto');
+    // Se obtiene la fecha actual.
+    const currentDate = new Date();
+    currentDate.setUTCHours(0, 0, 0, 0); // Establece la hora a 00:00:00.000
+    const formattedDate = currentDate.toISOString().split('T')[0];
+    // Eliminación de espacios en la ruta de la imagen.
+    const formattedImagen = deleteSpace(imagen);
+    const formattedNombreProyecto = parserUpperWord(nombreProyecto);
+    const formattedDescripcion = parserUpperWord(descripcion);
+    // Obtención de fk_id_junta_vecinal por el rut del representante.
+    const representante_fk_id_junta_vecinal = await RepresentanteVecinal.findOne({
+      where: { rut_representante: rut_user },
+      attributes: ['fk_id_junta_vecinal']
+    });
+    if (representante_fk_id_junta_vecinal) {
+      fk_id_junta_vecinal = representante_fk_id_junta_vecinal.dataValues['fk_id_junta_vecinal']
+    }
+    // ** Guardado de imagen **
+    const imageBuffer = decodeBase64Image(image);
+    const nombreImagen = deleteSpace(nombreProyecto);
+    const nombreImagenFormmated = convertToLowerCase(nombreImagen);
+    const imageName = `${nombreImagenFormmated}.png`;
+    const imageFolder = path.join(__dirname, "../../public/images/proyectos");
+    const imagePath = path.join(imageFolder, imageName);
+    if (!fs.existsSync(imagePath)) {
+      if (!fs.existsSync(imageFolder)) {
+        fs.mkdirSync(imageFolder, { recursive: true });
       }
-      //**guardado de imagen */
-      const imageBuffer = decodeBase64Image(image);
-      const nombreImagen = deleteSpace(nombreProyecto);
-      const nombreImagenFormmated = convertToLowerCase(nombreImagen);
-      const imageName = `${nombreImagenFormmated}.png`;
-      const imageFolder = path.join(__dirname, "../../public/images/proyectos");
-      const imagePath = path.join(imageFolder, imageName);
-      if (!fs.existsSync(imagePath)) {
-        if (!fs.existsSync(imageFolder)) {
-          fs.mkdirSync(imageFolder, { recursive: true });
-        }
-        fs.writeFileSync(imagePath, imageBuffer);
-      } else {
-        console.log('La imagen ya existe en la carpeta de proyectos');
-      }
+      fs.writeFileSync(imagePath, imageBuffer);
+    } else {
+      console.log('La imagen ya existe en la carpeta de proyectos');
+    }
 
-      const imageUrl = imageName;
-      //crea el objeto de datos del proyecto de tipo ProyectoType.
-      const proyectoData: ProyectoType = {
-        id_proyecto: maxId,
-        nombre: formattedNombreProyecto,
-        descripcion: formattedDescripcion,
-        cupo_min: cupoMinimo,
-        cupo_max: cupoMaximo,
-        estado,
-        ruta_imagen: imageUrl,
-        fecha_proyecto: formattedDate,
-        fk_id_junta_vecinal: fk_id_junta_vecinal
-      };
-      //inserción del proyecto.
-      const proyecto = await Proyecto.create(proyectoData);
-      //response.
-      return res.json({ resp: "Proyecto insertado exitosamente" });
-    } catch (error) {
-      //control nombre mensaje error.
-      const errorMessage = (error as any)?.parent?.message || (error as any)?.message;
-      console.log(errorMessage);
-      if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_nombre_unique) violada") {
-        // return res.send("El nombre del proyecto ya existe");
-        return res.status(400).json({ resp: "El nombre del proyecto ya existe", error: '0' });
+    const imageUrl = imageName;
+    // Crea el objeto de datos del proyecto de tipo ProyectoType.
+    const proyectoData: ProyectoType = {
+      id_proyecto: maxId,
+      nombre: formattedNombreProyecto,
+      descripcion: formattedDescripcion,
+      cupo_min: cupoMinimo,
+      cupo_max: cupoMaximo,
+      estado,
+      ruta_imagen: imageUrl,
+      fecha_proyecto: formattedDate,
+      fk_id_junta_vecinal: fk_id_junta_vecinal
+    };
+    // Inserción del proyecto.
+    const proyecto = await Proyecto.create(proyectoData);
+    // Response.
+    return res.json({ resp: "Proyecto insertado exitosamente" });
+  } catch (error) {
+    // Control nombre mensaje error.
+    const errorMessage = (error as any)?.parent?.message || (error as any)?.message;
+    console.log(errorMessage);
+    if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_nombre_unique) violada") {
+      // return res.send("El nombre del proyecto ya existe");
+      return res.status(400).json({ resp: "El nombre del proyecto ya existe", error: '0' });
+    } else {
+      if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_descripcion_unique) violada") {
+        return res.status(400).json({ resp: "La descripción ya existe", error: '1' });
       } else {
-        if (errorMessage === "ORA-00001: restricción única (C##JUNTA_VECINAL.proyecto_descripcion_unique) violada") {
-          return res.status(400).json({ resp: "La descripción ya existe", error: '1' });
-        } else {
-          return res.status(400).json({ resp: "Error al insertar el proyecto", error: '-1' });
-        }
+        return res.status(400).json({ resp: "Error al insertar el proyecto", error: '-1' });
       }
     }
   }
+}
+
 
   getProyects = async (req: Request, res: Response) => {
     try {

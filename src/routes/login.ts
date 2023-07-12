@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UpdateClave, UpdateProfile, getDataUser, login, profile, deleteUser } from "../controllers/user";
+import { UpdateClave, UpdateProfile, getDataUser, login, profile, deleteUser, deletereprese } from "../controllers/user";
 // import {verificarCorreo,cambiarContrasena } from "../controllers/resetpass";
 // //creacion de la ruta para los usuarios
 const router = Router();
@@ -10,5 +10,6 @@ router.get('/data', getDataUser);
 router.put('/update-perfil/:id_us', UpdateProfile);
 router.put('/update-clave/:id', UpdateClave);
 router.post('/delete', deleteUser);
+router.post('/deleterepre', deletereprese);
 
 export default router;
